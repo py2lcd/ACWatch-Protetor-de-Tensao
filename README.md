@@ -54,7 +54,7 @@ Bem-vindo ao repositório oficial do ACWatch, um sistema de proteção elétrica
 🖼️ Esquemas Elétricos
 ---
 
-### 🔌 Esquema ACWatch com Relé SSR
+### 🔌 Esquema ACWatch+ com Relé SSR
 
 <p align="center">
   <img src="ACWatch_Plus_SSR.jpg" alt="Esquema com Relé SSR" width="650"/>
@@ -63,7 +63,7 @@ Bem-vindo ao repositório oficial do ACWatch, um sistema de proteção elétrica
 
 ---
 
-### ⚙️ Esquema ACWatch com Módulo de 2 Relés Mecânicos
+### ⚙️ Esquema ACWatch+ (ALTERNATIVO) com Módulo de 2 Relés Mecânicos
 
 <p align="center">
   <img src="ACWatch_Plus_2CH_Relay.jpg" alt="Esquema com Relé 2CH" width="650"/>
@@ -119,9 +119,9 @@ Histórico de Falhas
 
 📂 Arquivos Importantes
 
-ACWatch-ESP32-DevKit-Docs.html — Interface Web completa
+ACWatch-ESP32-DevKit-Docs.html — Interface Web completa com Pinagem + Sketch
 
-ACWatch-ESP32-C3-Docs.html — Interface Web modo Eco
+ACWatch-ESP32-C3-Docs.html — Interface Web completa com Pinagem + Sketch (ECO)
 
 📡 Recomendações para Radioamadores
 
