@@ -34,7 +34,7 @@ IP do Painel: http://192.168.4.1
 Você será direcionado para o painel de controle principal.
 
 Manual da Interface Web
-(Nota para você: Aqui é o espaço perfeito para você adicionar o seu manual detalhado, explicando cada botão e função da página web, como o ajuste de parâmetros, o log de falhas, etc.)
+(Esta seção será detalhada com os esquemas elétricos e manuais de uso.)
 
 Painel Principal: Mostra a tensão atual, o modo de operação (110V/220V) e o estado do relé (Ligado/Desligado).
 
@@ -66,7 +66,7 @@ Todas as funcionalidades, incluindo Display OLED e Relógio de Tempo Real (RTC) 
 
 Esta é a versão completa do projeto, ideal para quem quer uma estação de monitoramento com display físico que mostra as informações o tempo todo. A presença do RTC garante que o horário e os logs de falha nunca se percam, mesmo após longas quedas de energia.
 
-Ver Documentação e Esquema de Ligações (ESP32 Dev Kit)
+Ver Documentação e Esquema de Ligações
 
 Ver Código-Fonte (Sketch Arduino)
 
@@ -89,11 +89,12 @@ Focado em baixo custo e eficiência. Não utiliza display ou RTC. A hora é sinc
 
 Esta é uma versão mais compacta e econômica, ideal para ser embutida em painéis ou caixas menores. Ela remove os componentes físicos de display e relógio, dependendo 100% da interface web para monitoramento e configuração. Possui um pino de alerta dedicado para um LED ou buzzer externo.
 
-Ver Documentação e Esquema de Ligações (ESP32-C3)
+Ver Documentação e Esquema de Ligações
 
 Ver Código-Fonte (Sketch Arduino)
 
 Recomendações para Radioamadores
+
 Para minimizar a geração de ruído (QRM/RFI), especialmente se estiver usando relés eletromecânicos comuns (módulos azuis), considere as seguintes melhorias:
 
 Filtro EMI: Instale um filtro EMI na entrada de energia do projeto. Isso limpará o ruído vindo da rede e impedirá que o ruído gerado pelo seu projeto contamine a fiação da sua estação.
