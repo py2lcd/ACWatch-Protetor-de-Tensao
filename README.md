@@ -16,6 +16,34 @@ Log de Falhas: Mantém um histórico de todas as vezes que a proteção foi ativ
 
 Backup de Energia (Opcional): Arquitetura pronta para a implementação de um sistema de backup com baterias.
 
+Como Usar (Primeiros Passos)
+Ao ligar o ACWatch pela primeira vez ou após resetar as configurações de Wi-Fi, ele entrará em Modo Ponto de Acesso (AP).
+
+No seu celular ou computador, procure por uma nova rede Wi-Fi.
+
+Conecte-se à rede com os seguintes dados:
+
+Nome da Rede (SSID): ACWatch_AP
+
+Senha: 12345678
+
+Após conectar, abra o navegador e acesse o endereço:
+
+IP do Painel: http://192.168.4.1
+
+Você será direcionado para o painel de controle principal.
+
+Manual da Interface Web
+(Nota para você: Aqui é o espaço perfeito para você adicionar o seu manual detalhado, explicando cada botão e função da página web, como o ajuste de parâmetros, o log de falhas, etc.)
+
+Painel Principal: Mostra a tensão atual, o modo de operação (110V/220V) e o estado do relé (Ligado/Desligado).
+
+Configurar Wi-Fi: Use este botão para procurar as redes Wi-Fi da sua casa ou sítio e inserir a senha. Após salvar, o ACWatch irá reiniciar e se conectar à sua rede, desativando o Modo AP.
+
+Ver Falhas: Acessa a página com o histórico de todas as vezes que a proteção de tensão foi ativada.
+
+Ajustar Data e Hora / Parâmetros: As seções recolhíveis permitem configurar o relógio (em modo AP) e os limites de tensão para a proteção.
+
 Versões do Projeto
 Este repositório contém duas versões do ACWatch, cada uma com um foco diferente.
 
