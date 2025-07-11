@@ -1,11 +1,7 @@
 /*
-  ACWatch - Sketch com Web UI, RTC DS3231 e histórico de falhas
-  Modificado por Gemini em 10/07/2024
-  - CORREÇÃO DE UI: Impede que a atualização automática da página sobrescreva a digitação nos campos de parâmetros.
-  - NOVO: Implementado ajuste de parâmetros de tensão (mín/máx) via página web.
-  - NOVO: Parâmetros de tensão são salvos na memória permanente do ESP32.
-  - CORREÇÃO DE LÓGICA: Garantido que o relé só ligue após 10 segundos de tensão estável na inicialização.
-*/
+  ACWatch PLUS- Sketch com Web UI, RTC DS3231 e histórico de falhas
+  By Billy Heinz Dorsch
+  */
 
 // =================================================================
 // === BIBLIOTECAS: As "caixas de ferramentas" do projeto ========

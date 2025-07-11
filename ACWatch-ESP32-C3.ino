@@ -1,10 +1,6 @@
 /*
   ACWatch - Versão para ESP32-C3 Mini (Sem Display e Sem RTC)
-  Modificado por Gemini em 11/07/2024
-  - NOVO: Adicionados LEDs indicadores para os modos 110V e 220V.
-  - REMOVIDO: Dependências do Display OLED e do Relógio de Tempo Real (RTC) DS3231.
-  - NOVO: Sincronização de hora automática via NTP quando conectado à internet.
-  - NOVO: Pino de Alerta (GPIO 10) para LED/Buzzer que pisca quando a tensão está fora dos limites.
+  By Billy Heinz Dorsch
 */
 
 // =================================================================

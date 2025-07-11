@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ACWatch - Documentação Completa</title>
+    <title>ACWatch Plus - Documentação Completa</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* Estilo para garantir uma boa aparência na impressão */
@@ -46,7 +46,7 @@
             
             <!-- Cabeçalho -->
             <div class="text-center border-b border-gray-200 dark:border-gray-700 pb-6 mb-6">
-                <h1 class="text-4xl font-bold text-indigo-600 dark:text-indigo-400">ACWatch</h1>
+                <h1 class="text-4xl font-bold text-indigo-600 dark:text-indigo-400">ACWatch Plus</h1>
                 <p class="text-lg text-gray-600 dark:text-gray-400 mt-2">Documentação Completa do Projeto</p>
             </div>
 
@@ -58,8 +58,10 @@
                     <li><b>Display:</b> Módulo OLED 0.96" I2C SSD1306</li>
                     <li><b>Relógio de Tempo Real:</b> Módulo RTC DS3231</li>
                     <li><b>Sensor de Tensão:</b> Módulo ZMPT101B</li>
-                    <li><b>Atuador:</b> Módulo Relé 2 Canais 5V</li>
+                    <li><b>Atuador:</b> 2x Relé de Estado Sólido (SSR-40 DA ou similar)</li>
+					<li><b>Atuador ALTERNATIVO:</b> Módulo Relé 2 Canais 5V</li>
                     <li><b>Botões:</b> 2x Push Button (Botão de Pulso)</li>
+					<li><b>Fonte 5VDC 1A ou mais - Bivolt ou para a tensão da rede</li>
                 </ul>
             </div>
 
@@ -92,11 +94,38 @@
                         </table>
                     </div>
                     <div class="border border-gray-200 dark:border-gray-700 p-5 rounded-lg">
-                        <h3 class="text-lg font-semibold mb-2">Módulo Relé (2 Canais)</h3>
+                        <h3 class="text-lg font-semibold mb-2">Relés de Estado Sólido (SSR)</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Cada SSR é controlado individualmente. O terminal positivo do controle é ligado ao pino do ESP32 e o negativo ao GND.</p>
+                        <table class="w-full text-left">
+                             <thead><tr class="border-b dark:border-gray-600"><th class="py-2">Componente</th><th class="py-2">Terminal de Controle</th><th class="py-2">Pino no ESP32</th></tr></thead>
+                            <tbody>
+                                <tr class="border-b dark:border-gray-700">
+                                    <td class="py-2" rowspan="2">Relé SSR 1 (Saída 1)</td>
+                                    <td class="py-2 font-mono">+ (Positivo)</td>
+                                    <td class="py-2 font-mono text-orange-400">GPIO 26</td>
+                                </tr>
+                                <tr class="border-b dark:border-gray-700">
+                                    <td class="py-2 font-mono">- (Negativo)</td>
+                                    <td class="py-2 font-mono text-blue-400">GND</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-2" rowspan="2">Relé SSR 2 (Saída 2)</td>
+                                    <td class="py-2 font-mono">+ (Positivo)</td>
+                                    <td class="py-2 font-mono text-orange-400">GPIO 27</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-2 font-mono">- (Negativo)</td>
+                                    <td class="py-2 font-mono text-blue-400">GND</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+					<div class="border border-gray-200 dark:border-gray-700 p-5 rounded-lg">
+                        <h3 class="text-lg font-semibold mb-2">Módulo Relé (2 Canais) ALTERNATIVO</h3>
                         <table class="w-full text-left">
                              <thead><tr class="border-b dark:border-gray-600"><th class="py-2">Pino do Componente</th><th class="py-2">Pino no ESP32</th><th class="py-2">Observação</th></tr></thead>
                             <tbody>
-                                <tr class="border-b dark:border-gray-700"><td class="py-2 font-mono">VCC</td><td class="py-2 font-mono text-red-500">3.3V</td><td class="py-2">Alimentação da lógica</td></tr>
+                                <tr class="border-b dark:border-gray-700"><td class="py-2 font-mono">VCC</td><td class="py-2 font-mono text-red-500">Fonte 5v</td><td class="py-2">Alimentação da lógica</td></tr>
                                 <tr class="border-b dark:border-gray-700"><td class="py-2 font-mono">GND</td><td class="py-2 font-mono text-blue-400">GND</td><td class="py-2">Terra</td></tr>
                                 <tr class="border-b dark:border-gray-700"><td class="py-2 font-mono">IN1</td><td class="py-2 font-mono text-orange-400">GPIO 26</td><td class="py-2">Controle do Relé 1</td></tr>
                                 <tr><td class="py-2 font-mono">IN2</td><td class="py-2 font-mono text-orange-400">GPIO 27</td><td class="py-2">Controle do Relé 2</td></tr>
@@ -124,13 +153,9 @@
                     <button class="copy-button no-print" onclick="copyCode()">Copiar Código</button>
 <pre><code id="sketch-code" class="language-cpp">
 /*
-  ACWatch - Sketch com Web UI, RTC DS3231 e histórico de falhas
-  Modificado por Gemini em 10/07/2024
-  - CORREÇÃO DE UI: Impede que a atualização automática da página sobrescreva a digitação nos campos de parâmetros.
-  - NOVO: Implementado ajuste de parâmetros de tensão (mín/máx) via página web.
-  - NOVO: Parâmetros de tensão são salvos na memória permanente do ESP32.
-  - CORREÇÃO DE LÓGICA: Garantido que o relé só ligue após 10 segundos de tensão estável na inicialização.
-*/
+  ACWatch Plus - Sketch com Web UI, RTC DS3231 e histórico de falhas
+  By Billy Heinz Dorsch
+  */
 
 // =================================================================
 // === BIBLIOTECAS: As "caixas de ferramentas" do projeto ========
@@ -391,7 +416,7 @@ const char PAGE_MAIN[] PROGMEM = R"=====(
 
     async function fetchStatus() {
         try {
-            const response = await fetch(window.location.origin + '/get-status');
+            const response = await fetch('/get-status');
             if (!response.ok) throw new Error('Network response was not ok');
             const data = await response.json();
             
@@ -429,7 +454,7 @@ const char PAGE_MAIN[] PROGMEM = R"=====(
         formData.append('date', `${year}-${pad(month)}-${pad(day)}`);
         formData.append('time', `${pad(hour)}:${pad(minute)}:${pad(second)}`);
         try {
-            const response = await fetch(window.location.origin + '/set-time', { method: 'POST', body: formData });
+            const response = await fetch('/set-time', { method: 'POST', body: formData });
             const resultText = await response.text();
             showStatusMessage(resultText, response.ok);
             if(response.ok) fetchStatus();
@@ -441,7 +466,7 @@ const char PAGE_MAIN[] PROGMEM = R"=====(
         event.preventDefault();
         const formData = new URLSearchParams(new FormData(paramsForm));
         try {
-            const response = await fetch(window.location.origin + '/set-params', { method: 'POST', body: formData });
+            const response = await fetch('/set-params', { method: 'POST', body: formData });
             const resultText = await response.text();
             showStatusMessage(resultText, response.ok);
             if (response.ok) {
@@ -482,21 +507,15 @@ void setup() {
   pinMode(pinRele2, OUTPUT);
   pinMode(pinBotaoModo, INPUT_PULLUP);
   pinMode(pinResetWiFi, INPUT_PULLUP);
+  pinMode(pinAlerta, OUTPUT);
+  pinMode(pinLed110V, OUTPUT);
+  pinMode(pinLed220V, OUTPUT);
   
+  // LÓGICA DE INICIALIZAÇÃO SEGURA
   desligarRele(); 
-  tempoUltimaTensaoSegura = millis(); 
-
-  // Inicia o display OLED
-  if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
-    Serial.println("Display nao encontrado");
-    while (true); // Trava o código se não encontrar o display
-  }
-  display.clearDisplay();
-  display.setTextColor(SSD1306_WHITE);
-  display.setTextSize(1);
-  display.setCursor(0, 0);
-  display.println("ACWatch iniciando...");
-  display.display();
+  digitalWrite(pinAlerta, LOW); // Garante que o alerta comece desligado
+  tempoUltimaTensaoSegura = millis(); // Inicia o contador de tempo para a verificação inicial de 10 segundos
+  atualizarLedsModo(); // Atualiza os LEDs de modo na inicialização
 
   // Inicia o sistema de arquivos SPIFFS
   if (!SPIFFS.begin(true)) {
@@ -519,7 +538,7 @@ void setup() {
   server.on("/", HTTP_GET, handleMainPage);
   server.on("/get-status", HTTP_GET, handleGetStatus);
   server.on("/set-time", HTTP_POST, handleSetTime);
-  server.on("/set-params", HTTP_POST, handleSetParams); // <-- ROTA NOVA
+  server.on("/set-params", HTTP_POST, handleSetParams);
   server.on("/modo", HTTP_POST, handleAlternarModo);
   server.on("/scan", HTTP_GET, handleScanWiFi);
   server.on("/configurar", HTTP_POST, handleConfigurarWiFi);
@@ -534,17 +553,6 @@ void setup() {
   } else {
     Serial.println("Falha ao iniciar mDNS");
   }
-
-  // Inicia o relógio RTC
-  if (!rtc.begin()) {
-    Serial.println("RTC nao encontrado");
-    while (true);
-  }
-  // Se o RTC perdeu energia, ajusta a hora com a data da compilação
-  if (rtc.lostPower()) {
-    Serial.println("RTC perdeu a hora, configurando padrao");
-    rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
-  }
 }
 
 // =================================================================
@@ -554,11 +562,17 @@ void loop() {
   // Permite que o servidor web atenda aos clientes
   server.handleClient();
 
+  // Se o relógio ainda não foi ajustado e estamos conectados ao Wi-Fi, tenta sincronizar via NTP
+  if (!timeIsSet &amp;&amp; WiFi.status() == WL_CONNECTED) {
+    syncTimeNTP();
+  }
+
   // Verifica se o botão de MODO foi pressionado
   static unsigned long ultimoClique = 0;
   if (digitalRead(pinBotaoModo) == LOW &amp;&amp; millis() - ultimoClique &gt; 1000) {
     modo220V = !modo220V;
     ultimoClique = millis();
+    atualizarLedsModo(); // Atualiza os LEDs após a troca de modo
     Serial.println(modo220V ? "Modo 220V" : "Modo 110V");
   }
 
@@ -575,19 +589,14 @@ void loop() {
     tempoPressionado = 0;
   }
 
-  // Atualiza as informações no display a cada meio segundo
-  if (millis() - ultimoAtualizacao &gt; 500) {
-    atualizarDisplay(lerTensaoRMS(), rtc.now());
-    ultimoAtualizacao = millis();
-  }
-
-  // A lógica de proteção agora usa as variáveis que podem ser ajustadas
+  // Lógica de proteção de tensão
   float tensao = lerTensaoRMS();
   float limiteMin = modo220V ? limiteMin220 : limiteMin127;
   float limiteMax = modo220V ? limiteMax220 : limiteMax127;
 
   // Se a tensão estiver FORA dos limites de segurança
   if (tensao &lt; limiteMin || tensao &gt; limiteMax) {
+    emAlertaDeTensao = true; // Ativa o estado de alerta
     if (estadoRele) { // E o relé estiver ligado
       desligarRele(); // Desliga o relé imediatamente
       Serial.println("Tensao fora da faixa! Rele desligado.");
@@ -598,11 +607,18 @@ void loop() {
   }
   // Se a tensão estiver DENTRO dos limites de segurança
   else {
+    emAlertaDeTensao = false; // Desativa o estado de alerta
+    digitalWrite(pinAlerta, LOW); // Garante que o LED/Buzzer desligue
     // E se o relé estiver desligado E já se passaram 10 segundos de estabilidade contínua
     if (!estadoRele &amp;&amp; (millis() - tempoUltimaTensaoSegura &gt; 10000)) {
       ligarRele(); // Liga o relé novamente
       Serial.println("Tensao estavel por 10s. Rele religado.");
     }
+  }
+
+  // Pisca o LED/Buzzer se estiver em estado de alerta
+  if (emAlertaDeTensao) {
+    digitalWrite(pinAlerta, (millis() / 500) % 2); // Pisca a cada 500ms
   }
 }
 
@@ -617,10 +633,15 @@ void handleMainPage() {
 
 // Envia os dados de status (tensão, modo, etc.) em formato JSON para a página web
 void handleGetStatus() {
-  DateTime now = rtc.now();
+  struct tm timeinfo;
+  String dateStr = "--/--/----";
+  String timeStr = "--:--:--";
+
+  if(timeIsSet &amp;&amp; getLocalTime(&amp;timeinfo)){
+    dateStr = String(formatDigit(timeinfo.tm_mday)) + "/" + String(formatDigit(timeinfo.tm_mon + 1)) + "/" + String(timeinfo.tm_year + 1900);
+    timeStr = String(formatDigit(timeinfo.tm_hour)) + ":" + String(formatDigit(timeinfo.tm_min)) + ":" + String(formatDigit(timeinfo.tm_sec));
+  }
   
-  String dateStr = String(formatDigit(now.day())) + "/" + String(formatDigit(now.month())) + "/" + String(now.year());
-  String timeStr = String(formatDigit(now.hour())) + ":" + String(formatDigit(now.minute())) + ":" + String(formatDigit(now.second()));
   String voltageStr = String(lerTensaoRMS(), 1);
   String modeStr = modo220V ? "220V" : "110V";
   String relayStr = estadoRele ? "LIGADO" : "DESLIGADO";
@@ -646,10 +667,20 @@ void handleSetTime() {
   if (server.hasArg("date") &amp;&amp; server.hasArg("time")) {
     String dateStr = server.arg("date");
     String timeStr = server.arg("time");
-    int year, month, day, hour, minute, second;
-    sscanf(dateStr.c_str(), "%d-%d-%d", &amp;year, &amp;month, &amp;day);
-    sscanf(timeStr.c_str(), "%d:%d:%d", &amp;hour, &amp;minute, &amp;second);
-    rtc.adjust(DateTime(year, month, day, hour, minute, second));
+    
+    struct tm tm;
+    sscanf(dateStr.c_str(), "%d-%d-%d", &amp;tm.tm_year, &amp;tm.tm_mon, &amp;tm.tm_mday);
+    sscanf(timeStr.c_str(), "%d:%d:%d", &amp;tm.tm_hour, &amp;tm.tm_min, &amp;tm.tm_sec);
+
+    tm.tm_year -= 1900; // tm_year é o número de anos desde 1900
+    tm.tm_mon -= 1;     // tm_mon é de 0-11
+
+    time_t t = mktime(&amp;tm);
+    struct timeval tv = { .tv_sec = t };
+    settimeofday(&amp;tv, NULL);
+
+    timeIsSet = true;
+    Serial.println("Hora ajustada manualmente!");
     server.send(200, "text/plain", "Data e Hora ajustadas com sucesso!");
   } else {
     server.send(400, "text/plain", "Erro: Dados incompletos.");
@@ -696,6 +727,8 @@ void configurarWiFi() {
       Serial.println("\nConectado ao Wi-Fi!");
       Serial.print("IP: ");
       Serial.println(WiFi.localIP());
+      // Inicia o cliente NTP após conectar ao Wi-Fi
+      timeClient.begin();
       return;
     } else {
       Serial.println("\nFalha ao conectar ao Wi-Fi.");
@@ -711,6 +744,7 @@ void configurarWiFi() {
 void handleAlternarModo() {
   modo220V = !modo220V;
   tempoUltimaTensaoSegura = millis();
+  atualizarLedsModo(); // Atualiza os LEDs após a troca de modo
   server.sendHeader("Location", "/");
   server.send(303);
 }
@@ -840,6 +874,27 @@ void handleLimparFalhas() {
 // === FUNÇÕES AUXILIARES: Tarefas de apoio ========================
 // =================================================================
 
+// Tenta sincronizar a hora com o servidor NTP
+void syncTimeNTP() {
+  if (timeClient.update()) {
+    timeIsSet = true;
+    Serial.println("Hora sincronizada com sucesso via NTP!");
+  } else {
+    Serial.println("Falha ao sincronizar a hora via NTP. Aguardando ajuste manual.");
+  }
+}
+
+// Atualiza os LEDs de modo de tensão
+void atualizarLedsModo() {
+  if (modo220V) {
+    digitalWrite(pinLed110V, LOW);
+    digitalWrite(pinLed220V, HIGH);
+  } else {
+    digitalWrite(pinLed110V, HIGH);
+    digitalWrite(pinLed220V, LOW);
+  }
+}
+
 // Adiciona um zero à esquerda para números menores que 10 (ex: 7 vira "07")
 String formatDigit(int digit) {
   if (digit &lt; 10) {
@@ -876,55 +931,20 @@ void ligarRele() {
   estadoRele = true;
 }
 
-// Função para ajudar a centralizar texto no display OLED
-void printCentralizado(String texto, int y, int tamanho) {
-  int16_t x1, y1;
-  uint16_t largura, altura;
-  display.setTextSize(tamanho);
-  display.getTextBounds(texto, 0, y, &amp;x1, &amp;y1, &amp;largura, &amp;altura);
-  int x = (SCREEN_WIDTH - largura) / 2;
-  display.setCursor(x, y);
-  display.print(texto);
-}
-
-// Desenha todas as informações no display OLED
-void atualizarDisplay(float tensao, DateTime now) {
-  bool alertaTensao = false;
-  float limiteMin = modo220V ? limiteMin220 : limiteMin127;
-  float limiteMax = modo220V ? limiteMax220 : limiteMax127;
-  if (tensao &lt; limiteMin || tensao &gt; limiteMax) {
-    alertaTensao = true;
-  }
-
-  // Faz o display piscar se a tensão estiver fora da faixa
-  if (alertaTensao &amp;&amp; (millis() % 1000 &lt; 500)) {
-    display.invertDisplay(true);
-  } else {
-    display.invertDisplay(false);
-  }
-
-  display.clearDisplay();
-
-  printCentralizado("ACWatch", 0, 2);
-
-  String leitura = String(tensao, 1) + " V";
-  printCentralizado(leitura, 18, 2);
-
-  String status = String(modo220V ? "MODO: 220V" : "MODO: 110V") +
-                  (estadoRele ? " LIGADO" : " DESLIGADO");
-  printCentralizado(status, 36, 1);
-
-  String horaBR = String(now.day()) + "/" + String(now.month()) + "/" + String(now.year()) + " " +
-                  String(now.hour()) + ":" + String(now.minute()) + ":" + String(now.second());
-  printCentralizado(horaBR, 48, 1);
-
-  display.display();
-}
-
 // Salva uma nova linha no arquivo de log de falhas
 void registrarFalha(float tensao) {
-  DateTime now = rtc.now();
-  String registro = now.timestamp() + " - Tensao fora da faixa: " + String(tensao, 1) + "V\n";
+  // Só registra a falha se o relógio já estiver ajustado
+  if (!timeIsSet) {
+    Serial.println("Log de falha ignorado: relogio nao sincronizado.");
+    return;
+  }
+  
+  struct tm timeinfo;
+  getLocalTime(&amp;timeinfo);
+  char timeString[20];
+  strftime(timeString, sizeof(timeString), "%Y-%m-%d %H:%M:%S", &amp;timeinfo);
+
+  String registro = String(timeString) + " - Tensao fora da faixa: " + String(tensao, 1) + "V\n";
 
   File log = SPIFFS.open("/falhas.log", FILE_APPEND);
   if (log) {
