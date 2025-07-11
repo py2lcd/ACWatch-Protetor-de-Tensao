@@ -103,7 +103,7 @@ Tela de Configurações Avançadas
 <p align="center">
 <img src="./extendida.jpg" alt="Tela de Configurações" width="400"/>
 </p>
-<p align="center"><em>Menus de "Ajustar Data e Hora" e "Ajustar Parâmetros de Tensão" expandidos, exibindo todos os campos de seleção e de entrada numérica para uma configuração detalhada do dispositivo.</em></p>
+<p align="center"><em>Menus de "Ajustar Data e Hora" e "Ajustar Parâmetros de Tensão" , Tempo de religamento do rele após falha, expandidos, exibindo todos os campos de seleção e de entrada numérica para uma configuração detalhada do dispositivo.</em></p>
 
 Tela de Configuração Wi-Fi
 <p align="center">
