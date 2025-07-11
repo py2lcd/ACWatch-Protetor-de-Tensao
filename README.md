@@ -83,8 +83,41 @@ Acesse o painel via navegador:
 
 IP: http://192.168.4.1
 
-📂 Arquivos Importantes
 
+🖼️ Galeria de Imagens
+Uma visão geral do projeto em funcionamento, desde o display físico até a interface web completa.
+
+Display OLED em Ação (Versão Plus)
+<p align="center">
+<img src="./oled.jpg" alt="Display OLED" width="400"/>
+</p>
+<p align="center"><em>Display OLED da versão "Plus" em pleno funcionamento, exibindo em tempo real as informações vitais do sistema: tensão da rede, modo de operação (110/220V), estado do relé e data/hora.</em></p>
+
+Painel de Controle Principal
+<p align="center">
+<img src="./principal.jpg" alt="Painel Principal" width="400"/>
+</p>
+<p align="center"><em>Painel de controle principal da interface web. Destaca o monitoramento em tempo real da tensão, modo de operação e estado do relé. Abaixo, apresenta os botões de configuração para conexão Wi-Fi e log de registro de falhas, além dos menus recolhíveis para ajustes avançados.</em></p>
+
+Tela de Configurações Avançadas
+<p align="center">
+<img src="./extendida.jpg" alt="Tela de Configurações" width="400"/>
+</p>
+<p align="center"><em>Menus de "Ajustar Data e Hora" e "Ajustar Parâmetros de Tensão" expandidos, exibindo todos os campos de seleção e de entrada numérica para uma configuração detalhada do dispositivo.</em></p>
+
+Tela de Configuração Wi-Fi
+<p align="center">
+<img src="./wifi.jpg" alt="Tela de Wi-Fi" width="400"/>
+</p>
+<p align="center"><em>Página de configuração de Wi-Fi. O sistema realiza uma varredura inteligente das redes sem fio ao alcance, exibindo-as em uma lista interativa para fácil seleção e conexão.</em></p>
+
+Histórico de Falhas
+<p align="center">
+<img src="./falhas.jpg" alt="Histórico de Falhas" width="400"/>
+</p>
+<p align="center"><em>Tela de "Histórico de Falhas", exibindo a tabela com os registos de eventos de tensão fora da faixa, com data, hora e o valor medido.</em></p>
+
+📂 Arquivos Importantes
 
 ACWatch-ESP32-DevKit-Docs.html — Interface Web completa
 
