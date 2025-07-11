@@ -1,7 +1,10 @@
 /*
-  ACWatch PLUS- Sketch com Web UI, RTC DS3231 e histórico de falhas
-  By Billy Heinz Dorsch
-  */
+  ACWatch - Sketch com Web UI, RTC DS3231 e histórico de falhas
+  Modificado por Gemini em 11/07/2024
+  - CORREÇÃO: Melhorada a lógica de inicialização do RTC para não resetar a hora automaticamente, evitando que o relógio fique preso em um horário antigo em caso de falha na bateria do módulo.
+  - UPGRADE: Adicionada funcionalidade para ajustar o tempo de religamento do relé via interface web.
+  - UPGRADE: O tempo de religamento agora é salvo na memória permanente.
+*/
 
 // =================================================================
 // === BIBLIOTECAS: As "caixas de ferramentas" do projeto ========
@@ -51,17 +54,16 @@ bool estadoRele = false;
 unsigned long tempoPressionado = 0;
 unsigned long ultimoAtualizacao = 0;
 unsigned long tempoUltimaTensaoSegura = 0;
+unsigned long tempoReligamento = 10000; // Valor padrão de 10 segundos (em milissegundos)
 
 // =================================================================
 // === PARÂMETROS DE TENSÃO: Limites de operação ===================
 // =================================================================
-// Valores padrão que podem ser sobrescritos pelos ajustes na página web.
 float limiteMin127 = 95.0;
 float limiteMax127 = 135.0;
 float limiteMin220 = 200.0;
 float limiteMax220 = 265.0;
 
-// Fatores de calibração (ainda fixos no código)
 const float fatorCalibracao127 = 492.7;
 const float fatorCalibracao220 = 546.9;
 
@@ -76,6 +78,7 @@ void handleMainPage();
 void handleGetStatus();
 void handleSetTime();
 void handleSetParams();
+void handleSetDelay();
 void handleAlternarModo();
 void handleScanWiFi();
 void handleConfigurarWiFi();
@@ -229,12 +232,24 @@ const char PAGE_MAIN[] PROGMEM = R"=====(
                 <button type="submit">Salvar Par&acirc;metros</button>
             </form>
         </details>
+
+        <details>
+            <summary>Ajustar Tempo de Religamento</summary>
+            <form id="delayForm" style="margin-top: 16px;">
+                <div>
+                    <label for="delay">Tempo de Espera (segundos)</label>
+                    <input type="number" id="delay" name="delay" min="1" step="1">
+                </div>
+                <button type="submit">Salvar Tempo</button>
+            </form>
+        </details>
     </div>
 <script>
     const timeForm = document.getElementById('timeForm');
     const paramsForm = document.getElementById('paramsForm');
+    const delayForm = document.getElementById('delayForm');
     const statusMessage = document.getElementById('statusMessage');
-    let initialParamsLoad = true; // Flag para controlar o carregamento inicial dos parâmetros
+    let initialParamsLoad = true;
 
     function populateDateTimeSelectors() {
         const now = new Date();
@@ -275,14 +290,13 @@ const char PAGE_MAIN[] PROGMEM = R"=====(
             relayStatusEl.textContent = data.relay;
             relayStatusEl.className = 'status-value ' + (data.relay === 'LIGADO' ? 'relay-on' : 'relay-off');
 
-            // Apenas preenche os campos de parâmetros no carregamento inicial
-            // ou após salvar, para não atrapalhar a digitação.
             if (initialParamsLoad) {
                 document.getElementById('min110').value = data.limMin110;
                 document.getElementById('max110').value = data.limMax110;
                 document.getElementById('min220').value = data.limMin220;
                 document.getElementById('max220').value = data.limMax220;
-                initialParamsLoad = false; // Desativa a flag após o primeiro carregamento
+                document.getElementById('delay').value = data.releDelay;
+                initialParamsLoad = false;
             }
 
         } catch (error) {
@@ -318,11 +332,26 @@ const char PAGE_MAIN[] PROGMEM = R"=====(
             const resultText = await response.text();
             showStatusMessage(resultText, response.ok);
             if (response.ok) {
-                initialParamsLoad = true; // Permite que os campos sejam atualizados com os novos valores na próxima busca
+                initialParamsLoad = true;
                 fetchStatus();
             }
         } catch (error) {
             showStatusMessage('Erro de conexao ao salvar parametros.', false);
+        }
+    }
+    async function handleDelaySubmit(event) {
+        event.preventDefault();
+        const formData = new URLSearchParams(new FormData(delayForm));
+        try {
+            const response = await fetch('/set-delay', { method: 'POST', body: formData });
+            const resultText = await response.text();
+            showStatusMessage(resultText, response.ok);
+            if (response.ok) {
+                initialParamsLoad = true;
+                fetchStatus();
+            }
+        } catch (error) {
+            showStatusMessage('Erro de conexao ao salvar tempo.', false);
         }
     }
     function showStatusMessage(message, isSuccess) {
@@ -336,6 +365,7 @@ const char PAGE_MAIN[] PROGMEM = R"=====(
         setInterval(fetchStatus, 1000);
         timeForm.addEventListener('submit', handleTimeSubmit);
         paramsForm.addEventListener('submit', handleParamsSubmit);
+        delayForm.addEventListener('submit', handleDelaySubmit);
     });
 </script>
 </body>
@@ -372,22 +402,21 @@ void setup() {
     Serial.println("Falha ao montar SPIFFS");
   }
 
-  // Inicia a memória para salvar as preferências
   preferences.begin("ACWatch", false);
 
-  // Carrega os parâmetros de tensão salvos ou usa os padrões
   limiteMin127 = preferences.getFloat("limMin127", 95.0);
   limiteMax127 = preferences.getFloat("limMax127", 135.0);
   limiteMin220 = preferences.getFloat("limMin220", 200.0);
   limiteMax220 = preferences.getFloat("limMax220", 265.0);
+  tempoReligamento = preferences.getULong("releDelay", 10000);
 
   configurarWiFi();
 
-  // Configura as "páginas" do servidor web
   server.on("/", HTTP_GET, handleMainPage);
   server.on("/get-status", HTTP_GET, handleGetStatus);
   server.on("/set-time", HTTP_POST, handleSetTime);
-  server.on("/set-params", HTTP_POST, handleSetParams); // <-- ROTA NOVA
+  server.on("/set-params", HTTP_POST, handleSetParams);
+  server.on("/set-delay", HTTP_POST, handleSetDelay);
   server.on("/modo", HTTP_POST, handleAlternarModo);
   server.on("/scan", HTTP_GET, handleScanWiFi);
   server.on("/configurar", HTTP_POST, handleConfigurarWiFi);
@@ -406,9 +435,13 @@ void setup() {
     Serial.println("RTC nao encontrado");
     while (true);
   }
+  
+  // LÓGICA DO RTC CORRIGIDA
   if (rtc.lostPower()) {
-    Serial.println("RTC perdeu a hora, configurando padrao");
-    rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+    Serial.println("ATENCAO: A energia do RTC foi perdida. O horario pode estar incorreto.");
+    Serial.println("Ajuste o horario pela interface web para sincronizar.");
+    // Nao ajustamos a hora automaticamente. Forcamos o usuario a fazer isso.
+    // Assim que a hora for ajustada via web, o flag 'lostPower' sera limpo.
   }
 }
 
@@ -442,7 +475,6 @@ void loop() {
     ultimoAtualizacao = millis();
   }
 
-  // A lógica de proteção agora usa as variáveis que podem ser ajustadas
   float tensao = lerTensaoRMS();
   float limiteMin = modo220V ? limiteMin220 : limiteMin127;
   float limiteMax = modo220V ? limiteMax220 : limiteMax127;
@@ -456,9 +488,9 @@ void loop() {
     tempoUltimaTensaoSegura = millis();
   }
   else {
-    if (!estadoRele && (millis() - tempoUltimaTensaoSegura > 10000)) {
+    if (!estadoRele && (millis() - tempoUltimaTensaoSegura > tempoReligamento)) {
       ligarRele();
-      Serial.println("Tensao estavel por 10s. Rele religado.");
+      Serial.println("Tensao estavel. Rele religado.");
     }
   }
 }
@@ -486,11 +518,11 @@ void handleGetStatus() {
   json += "\"voltage\":" + voltageStr + ",";
   json += "\"mode\":\"" + modeStr + "\",";
   json += "\"relay\":\"" + relayStr + "\",";
-  // Adiciona os limites atuais ao JSON para preencher o formulário na página
   json += "\"limMin110\":" + String(limiteMin127) + ",";
   json += "\"limMax110\":" + String(limiteMax127) + ",";
   json += "\"limMin220\":" + String(limiteMin220) + ",";
-  json += "\"limMax220\":" + String(limiteMax220);
+  json += "\"limMax220\":" + String(limiteMax220) + ",";
+  json += "\"releDelay\":" + String(tempoReligamento / 1000);
   json += "}";
   
   server.send(200, "application/json", json);
@@ -510,17 +542,13 @@ void handleSetTime() {
   }
 }
 
-// <-- NOVA FUNÇÃO PARA SALVAR OS PARÂMETROS DE TENSÃO -->
 void handleSetParams() {
-  // Verifica se todos os 4 argumentos foram recebidos
   if (server.hasArg("min110") && server.hasArg("max110") && server.hasArg("min220") && server.hasArg("max220")) {
-    // Atualiza as variáveis globais com os novos valores
     limiteMin127 = server.arg("min110").toFloat();
     limiteMax127 = server.arg("max110").toFloat();
     limiteMin220 = server.arg("min220").toFloat();
     limiteMax220 = server.arg("max220").toFloat();
 
-    // Salva os novos valores na memória permanente
     preferences.putFloat("limMin127", limiteMin127);
     preferences.putFloat("limMax127", limiteMax127);
     preferences.putFloat("limMin220", limiteMin220);
@@ -530,6 +558,18 @@ void handleSetParams() {
     server.send(200, "text/plain", "Parametros salvos com sucesso!");
   } else {
     server.send(400, "text/plain", "Erro: Dados de parametros incompletos.");
+  }
+}
+
+void handleSetDelay() {
+  if (server.hasArg("delay")) {
+    tempoReligamento = server.arg("delay").toInt() * 1000;
+    preferences.putULong("releDelay", tempoReligamento);
+    
+    Serial.println("Novo tempo de religamento salvo!");
+    server.send(200, "text/plain", "Tempo de religamento salvo com sucesso!");
+  } else {
+    server.send(400, "text/plain", "Erro: Dado de tempo incompleto.");
   }
 }
 
