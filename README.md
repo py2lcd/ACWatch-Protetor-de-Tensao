@@ -135,7 +135,7 @@ Circuito Snubber nos relés comuns
 
 [x] ACWatch V1: ✅ Concluída e funcional
 
-[ ] ACWatch V2: ⚙️ Sensores de temperatura, umidade e corrente, botão de ajuste de tempo desligado quando entra em proteção (em desenvolvimento)
+[ ] ACWatch V2: ⚙️ Sensores de temperatura, umidade e corrente, (em desenvolvimento)
 
 📜 Licença
 
