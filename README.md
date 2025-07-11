@@ -94,7 +94,6 @@ Ver Documentação e Esquema de Ligações
 Ver Código-Fonte (Sketch Arduino)
 
 Recomendações para Radioamadores
-
 Para minimizar a geração de ruído (QRM/RFI), especialmente se estiver usando relés eletromecânicos comuns (módulos azuis), considere as seguintes melhorias:
 
 Filtro EMI: Instale um filtro EMI na entrada de energia do projeto. Isso limpará o ruído vindo da rede e impedirá que o ruído gerado pelo seu projeto contamine a fiação da sua estação.
