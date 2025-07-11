@@ -1,115 +1,60 @@
-ACWatch - Protetor de Tensão Inteligente com Monitoramento Web
-Bem-vindo ao repositório oficial do ACWatch, um protetor de tensão inteligente, de código aberto, projetado para monitorar e proteger seus equipamentos eletrônicos contra variações na rede elétrica. O projeto oferece uma interface web completa para monitoramento e configuração em tempo real.
+📝 ACWatch – Protetor de Tensão Inteligente com Monitoramento Web
 
-(Insira aqui uma foto do seu projeto montado!)
+Bem-vindo ao repositório oficial do ACWatch, um sistema de proteção elétrica com alma de engenharia! Baseado em ESP32, oferece monitoramento web, controle de relé, RTC, interface intuitiva e possibilidade de expansão com sensores.
 
-Funcionalidades Principais
-Proteção Ativa: Desliga automaticamente os equipamentos quando a tensão sai dos limites seguros definidos por você.
+🔧 Funcionalidades Principais
+⚡ Proteção Ativa: desliga automaticamente quando a tensão sai dos limites seguros
 
-Religamento Inteligente: Aguarda um período de estabilidade (10 segundos) antes de religar os equipamentos.
+🧠 Religamento Inteligente: espera estabilidade antes de reconectar
 
-Monitoramento Web: Acesse um painel de controle completo pelo navegador do seu celular ou computador para ver a tensão, o modo de operação e o estado do relé em tempo real.
+🌐 Interface Web: controle via celular ou PC com ajuste de hora, Wi-Fi e histórico
 
-Parâmetros Ajustáveis: Configure os limites de tensão mínima e máxima para os modos 110V e 220V diretamente pela interface web.
+📟 Display OLED (versão Plus): exibição direta de tensão e estado
 
-Log de Falhas: Mantém um histórico de todas as vezes que a proteção foi ativada, acessível pela página web.
+📘 RTC com bateria: preserva horário e logs após quedas de energia
 
-Backup de Energia (Opcional): Arquitetura pronta para a implementação de um sistema de backup com baterias.
+🧪 Modo Eco (ESP32-C3): sem display, ideal pra embutir em caixas compactas
 
-Como Usar (Primeiros Passos)
-Ao ligar o ACWatch pela primeira vez ou após resetar as configurações de Wi-Fi, ele entrará em Modo Ponto de Acesso (AP).
+🖼️ Esquemas Elétricos
+🔌 Versão ACWatch Plus – ESP32 Dev Kit
+<p align="center"> <img src="acwatch-esquema-plus.jpg" alt="Esquema ACWatch Plus" width="650"/> </p> <p align="center"><em>Figura 1 – Esquema completo com RTC, OLED, relé SSR, botão de modo e sensor ZMPT101B.</em></p>
 
-No seu celular ou computador, procure por uma nova rede Wi-Fi.
+⚙️ Versão ACWatch Eco – ESP32-C3 Mini
+<p align="center"> <img src="acwatch-esquema-eco.jpg" alt="Esquema ACWatch Eco" width="650"/> </p> <p align="center"><em>Figura 2 – Versão simplificada sem display ou RTC. Ideal para projetos de baixo custo.</em></p>
 
-Conecte-se à rede com os seguintes dados:
+🚀 Como Usar – Passos Iniciais
+Ligue o ACWatch pela primeira vez (ou após reset Wi-Fi)
 
-Nome da Rede (SSID): ACWatch_AP
+Conecte-se à rede Wi-Fi criada:
+
+SSID: ACWatch_AP
 
 Senha: 12345678
 
-Após conectar, abra o navegador e acesse o endereço:
+Acesse o painel via navegador:
 
-IP do Painel: http://192.168.4.1
+IP: http://192.168.4.1
 
-Você será direcionado para o painel de controle principal.
+📂 Arquivos Importantes
+ACWatch-ESP32-DevKit.ino — Sketch principal da versão Plus
 
-Manual da Interface Web
-(Esta seção será detalhada com os esquemas elétricos e manuais de uso.)
+ACWatch-ESP32-C3.ino — Versão Eco com RTC online (em desenvolvimento)
 
-Painel Principal: Mostra a tensão atual, o modo de operação (110V/220V) e o estado do relé (Ligado/Desligado).
+ACWatch-ESP32-DevKit-Docs.html — Interface Web completa
 
-Configurar Wi-Fi: Use este botão para procurar as redes Wi-Fi da sua casa ou sítio e inserir a senha. Após salvar, o ACWatch irá reiniciar e se conectar à sua rede, desativando o Modo AP.
+ACWatch-ESP32-C3-Docs.html — Interface Web modo Eco
 
-Ver Falhas: Acessa a página com o histórico de todas as vezes que a proteção de tensão foi ativada.
+📡 Recomendações para Radioamadores
+Filtro EMI na entrada
 
-Ajustar Data e Hora / Parâmetros: As seções recolhíveis permitem configurar o relógio (em modo AP) e os limites de tensão para a proteção.
+Relés SSR com Zero-Crossing
 
-Versões do Projeto
-Este repositório contém duas versões do ACWatch, cada uma com um foco diferente.
+Circuito Snubber nos relés comuns
 
-1. ACWatch Plus (ESP32 Dev Kit)
+🛠️ Próximas Versões
+[x] ACWatch V5: ✅ Concluída e funcional
 
+[ ] ACWatch V6: ⚙️ Sensores de temperatura, umidade e corrente (em desenvolvimento)
 
-
-
-Status:
-
-✅ Estável e Testado
-
-Placa:
-
-ESP32 Dev Kit (com 38 pinos)
-
-Recursos:
-
-Todas as funcionalidades, incluindo Display OLED e Relógio de Tempo Real (RTC) com bateria.
-
-Esta é a versão completa do projeto, ideal para quem quer uma estação de monitoramento com display físico que mostra as informações o tempo todo. A presença do RTC garante que o horário e os logs de falha nunca se percam, mesmo após longas quedas de energia.
-
-Ver Documentação e Esquema de Ligações
-
-Ver Código-Fonte (Sketch Arduino)
-
-2. ACWatch Eco (ESP32-C3 Mini)
-
-
-
-
-Status:
-
-⚠️ Em Desenvolvimento (Não Testado)
-
-Placa:
-
-ESP32-C3 Mini (ou similar)
-
-Recursos:
-
-Focado em baixo custo e eficiência. Não utiliza display ou RTC. A hora é sincronizada via internet (NTP).
-
-Esta é uma versão mais compacta e econômica, ideal para ser embutida em painéis ou caixas menores. Ela remove os componentes físicos de display e relógio, dependendo 100% da interface web para monitoramento e configuração. Possui um pino de alerta dedicado para um LED ou buzzer externo.
-
-Ver Documentação e Esquema de Ligações
-
-Ver Código-Fonte (Sketch Arduino)
-
-Recomendações para Radioamadores
-Para minimizar a geração de ruído (QRM/RFI), especialmente se estiver usando relés eletromecânicos comuns (módulos azuis), considere as seguintes melhorias:
-
-Filtro EMI: Instale um filtro EMI na entrada de energia do projeto. Isso limpará o ruído vindo da rede e impedirá que o ruído gerado pelo seu projeto contamine a fiação da sua estação.
-
-Circuito Snubber: Para relés eletromecânicos, adicione um circuito snubber (resistor + capacitor) em paralelo com a carga de alta tensão para suprimir a faísca gerada na comutação.
-
-Relés de Estado Sólido (SSR): A melhor opção para um ambiente de rádio "silencioso" é usar SSRs com comutação "Zero-Crossing", como os utilizados no desenvolvimento deste projeto.
-
-Próximos Passos (Ideias para o Futuro)
-[ ] Integração com sistema de energia solar para gerenciamento de carga.
-
-[ ] Adição de um sensor de temperatura e umidade (DHT22).
-
-[ ] Notificações de falha via Wi-Fi (MQTT, Telegram, etc.).
-
-[ ] Monitoramento de consumo de corrente e potência.
-
-Licença
-Este projeto é de código aberto. Sinta-se à vontade para usar, modificar e compartilhar.
+📜 Licença
+Projeto de código aberto. Use, modifique, compartilhe e melhore! Créditos Billy Dorsch
