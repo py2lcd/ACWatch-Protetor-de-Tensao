@@ -13,7 +13,43 @@ Bem-vindo ao repositório oficial do ACWatch, um sistema de proteção elétrica
 
 📘 RTC com bateria: preserva horário e logs após quedas de energia
 
-🧪 Modo Eco (ESP32-C3): sem display, ideal pra embutir em caixas compactas
+
+## 🌱 ACWatch ECO (Versão ESP32-C3 Mini)
+
+> ⚠️ Esta versão está em desenvolvimento e ainda não foi testada em hardware físico.  
+> Estrutura simplificada, sem display e RTC físico. Com LEDs indicadores e interface web NTP/manual.
+
+📁 Localização: `ACWatch-Eco-C3-Mini/`
+
+[ACWatch-ESP32-C3-Docs.html](ACWatch-Eco-C3-Mini/ACWatch-ESP32-C3-Docs.html) — Interface Web modo Eco
+
+**Principais características:**
+
+- ✅ LEDs indicadores de tensão (110V, 220V) e alerta de falha (opcional Buzzer )
+- 🌐 Interface Web completa:
+  - Atualização automática da hora via NTP
+  - Ajuste manual de hora via navegador em modo offline (Access point)
+- ❌ Sem RTC externo e sem display OLED
+
+---
+
+### 🔍 Comparativo entre versões: ACWatch Plus vs ACWatch Eco
+
+| Característica               | ACWatch Plus (DevKit/OLED) | ACWatch Eco (ESP32-C3 Mini)     |
+|-----------------------------|-----------------------------|----------------------------------|
+| 🧠 RTC físico com bateria    | ✅ Sim                      | ❌ Não                            |
+| 📟 Display OLED              | ✅ Sim                      | ❌ Não                            |
+| 🔌 LEDs indicadores          | ❌ Não                      | ✅ Sim                            |
+| 🔊 Alerta com buzzer         | ❌ Não                      | ✅ Opcional                       |
+| 🌐 Interface Web             | ✅ Completa                 | ✅ Completa                       |
+| 📡 Atualização da hora       | ✅ RTC / NTP                | ✅ NTP / manual via navegador     |
+| ⚙️ Controle de relé          | ✅ Sim                      | ✅ Sim                            |
+| 📦 Tamanho da placa          | Grande (DevKit)            | Compacta (Mini)                  |
+| 🧪 Estado do projeto         | ✅ Testado em hardware      | ⚠️ Em desenvolvimento            |
+
+---
+
+
 
 🖼️ Esquemas Elétricos
 ---
@@ -49,9 +85,6 @@ IP: http://192.168.4.1
 
 📂 Arquivos Importantes
 
-ACWatch-ESP32-DevKit.ino — Sketch principal da versão Plus
-
-ACWatch-ESP32-C3.ino — Versão Eco com RTC online (em desenvolvimento)
 
 ACWatch-ESP32-DevKit-Docs.html — Interface Web completa
 

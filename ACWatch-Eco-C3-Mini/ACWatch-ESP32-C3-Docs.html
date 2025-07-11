@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ACWatch (ESP32-C3) - Documentação Completa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Estilo para garantir uma boa aparência na impressão */
+        @media print {
+            body {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .no-print {
+                display: none;
+            }
+            .code-block {
+                page-break-inside: avoid;
+            }
+        }
+        .code-block {
+            position: relative;
+        }
+        .copy-button {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background-color: #4a5568;
+            color: white;
+            border: none;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+        .copy-button:hover {
+            background-color: #2d3748;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 font-sans">
+
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8">
+            
+            <!-- Cabeçalho -->
+            <div class="text-center border-b border-gray-200 dark:border-gray-700 pb-6 mb-6">
+                <h1 class="text-4xl font-bold text-indigo-600 dark:text-indigo-400">ACWatch ECO</h1>
+                <p class="text-lg text-gray-600 dark:text-gray-400 mt-2">Documentação Completa (Versão ESP32-C3 Mini)</p>
+            </div>
+
+            <!-- Lista de Componentes -->
+            <div class="mb-8">
+                <h2 class="text-2xl font-semibold mb-4">Lista de Componentes</h2>
+                <ul class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-300">
+                    <li><b>Placa Controladora:</b> ESP32-C3 Mini</li>
+                    <li><b>Sensor de Tensão:</b> Módulo ZMPT101B</li>
+                    <li><b>Atuador:</b> Módulo Relé 2 Canais 5V</li>
+                    <li><b>Botões:</b> 2x Push Button (Botão de Pulso)</li>
+                    <li><b>Alerta de Falha:</b> 1x LED de 5mm (ex: Vermelho) ou 1x Buzzer 5V</li>
+                    <li><b>Indicador de Modo 110V:</b> 1x LED de 5mm (ex: Verde)</li>
+                    <li><b>Indicador de Modo 220V:</b> 1x LED de 5mm (ex: Amarelo)</li>
+                </ul>
+            </div>
+
+            <!-- Diagrama de Conexões -->
+            <div class="mb-8">
+                <h2 class="text-2xl font-semibold mb-6">Diagrama de Conexões</h2>
+                <div class="space-y-6">
+                    <div class="border border-gray-200 dark:border-gray-700 p-5 rounded-lg">
+                        <h3 class="text-lg font-semibold mb-2">Sensor de Tensão (ZMPT101B)</h3>
+                        <table class="w-full text-left">
+                            <thead><tr class="border-b dark:border-gray-600"><th class="py-2">Pino do Componente</th><th class="py-2">Pino no ESP32-C3</th><th class="py-2">Observação</th></tr></thead>
+                            <tbody>
+                                <tr class="border-b dark:border-gray-700"><td class="py-2 font-mono">VCC</td><td class="py-2 font-mono text-red-500">3.3V</td><td class="py-2">Alimentação</td></tr>
+                                <tr class="border-b dark:border-gray-700"><td class="py-2 font-mono">GND</td><td class="py-2 font-mono text-blue-400">GND</td><td class="py-2">Terra</td></tr>
+                                <tr><td class="py-2 font-mono">OUT / S</td><td class="py-2 font-mono text-purple-400">GPIO 4</td><td class="py-2">Sinal analógico (ADC1_CH4)</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="border border-gray-200 dark:border-gray-700 p-5 rounded-lg">
+                        <h3 class="text-lg font-semibold mb-2">Módulo Relé (2 Canais)</h3>
+                        <table class="w-full text-left">
+                             <thead><tr class="border-b dark:border-gray-600"><th class="py-2">Pino do Componente</th><th class="py-2">Pino no ESP32-C3</th><th class="py-2">Observação</th></tr></thead>
+                            <tbody>
+                                <tr class="border-b dark:border-gray-700"><td class="py-2 font-mono">VCC</td><td class="py-2 font-mono text-red-500">3.3V</td><td class="py-2">Alimentação da lógica</td></tr>
+                                <tr class="border-b dark:border-gray-700"><td class="py-2 font-mono">GND</td><td class="py-2 font-mono text-blue-400">GND</td><td class="py-2">Terra</td></tr>
+                                <tr class="border-b dark:border-gray-700"><td class="py-2 font-mono">IN1</td><td class="py-2 font-mono text-orange-400">GPIO 5</td><td class="py-2">Controle do Relé 1</td></tr>
+                                <tr><td class="py-2 font-mono">IN2</td><td class="py-2 font-mono text-orange-400">GPIO 6</td><td class="py-2">Controle do Relé 2</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="border border-gray-200 dark:border-gray-700 p-5 rounded-lg">
+                        <h3 class="text-lg font-semibold mb-2">Botões e LEDs</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Os botões são ligados entre o pino de sinal e o GND. Os LEDs são ligados entre o pino de sinal e o GND (com um resistor apropriado, ex: 220 Ohm).</p>
+                        <table class="w-full text-left">
+                             <thead><tr class="border-b dark:border-gray-600"><th class="py-2">Componente</th><th class="py-2">Pino no ESP32-C3</th><th class="py-2">Outro terminal</th></tr></thead>
+                            <tbody>
+                                <tr class="border-b dark:border-gray-700"><td class="py-2">Botão de Modo (110/220V)</td><td class="py-2 font-mono text-pink-400">GPIO 7</td><td class="py-2 font-mono text-blue-400">GND</td></tr>
+                                <tr class="border-b dark:border-gray-700"><td class="py-2">Botão de Reset Wi-Fi</td><td class="py-2 font-mono text-pink-400">GPIO 8</td><td class="py-2 font-mono text-blue-400">GND</td></tr>
+                                <tr class="border-b dark:border-gray-700"><td class="py-2">LED/Buzzer de Alerta</td><td class="py-2 font-mono text-teal-400">GPIO 10</td><td class="py-2 font-mono text-blue-400">GND</td></tr>
+                                <tr class="border-b dark:border-gray-700"><td class="py-2">LED Indicador 110V</td><td class="py-2 font-mono text-green-400">GPIO 2</td><td class="py-2 font-mono text-blue-400">GND</td></tr>
+                                <tr><td class="py-2">LED Indicador 220V</td><td class="py-2 font-mono text-yellow-400">GPIO 3</td><td class="py-2 font-mono text-blue-400">GND</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Código-Fonte Completo -->
+            <div>
+                <h2 class="text-2xl font-semibold mb-6">Código-Fonte Completo (Sketch para ESP32-C3 Mini)</h2>
+                <div class="code-block bg-gray-900 text-white rounded-lg p-4 overflow-x-auto">
+                    <button class="copy-button no-print" onclick="copyCode()">Copiar Código</button>
+<pre><code id="sketch-code" class="language-cpp">
+/*
+  ACWatch ECO - Versão para ESP32-C3 Mini (Sem Display e Sem RTC)
+  By Billy Heinz Dorsch
+*/
+
+// =================================================================
+// === BIBLIOTECAS: As "caixas de ferramentas" do projeto ========
+// =================================================================
+#include &lt;WiFi.h&gt;
+#include &lt;WebServer.h&gt;
+#include &lt;WiFiScan.h&gt;
+#include &lt;ESPmDNS.h&gt;
+#include &lt;Preferences.h&gt;
+#include &lt;SPIFFS.h&gt;
+#include "time.h"                 // Biblioteca para gerenciar o relógio interno
+#include &lt;NTPClient.h&gt;            // Biblioteca para buscar a hora na internet
+
+// =================================================================
+// === OBJETOS GLOBAIS =============================================
+// =================================================================
+WebServer server(80);
+Preferences preferences;
+WiFiUDP ntpUDP;
+// Configura o cliente NTP para o fuso de Brasília (GMT -3 horas = -10800 segundos)
+NTPClient timeClient(ntpUDP, "pool.ntp.org", -10800);
+
+// =================================================================
+// === CONFIGURAÇÕES DE REDE: Dados do Wi-Fi =======================
+// =================================================================
+const char* ssidAP = "ACWatch_AP";
+const char* passwordAP = "12345678";
+
+// =================================================================
+// === PINOS: Mapeamento das conexões físicas ======================
+// =================================================================
+// ATENÇÃO: Verifique se estes pinos são adequados para sua placa ESP32-C3 Mini.
+const int pinSensor   = 4;        // Pino que lê a tensão (ADC1_CH4 no C3)
+const int pinRele1    = 5;        // Pino que controla o primeiro relé
+const int pinRele2    = 6;        // Pino que controla o segundo relé
+const int pinBotaoModo  = 7;        // Pino do botão que alterna entre 110V e 220V
+const int pinResetWiFi  = 8;        // Pino do botão que reseta as configurações de Wi-Fi
+const int pinAlerta   = 10;       // Pino para o LED/Buzzer de alerta
+const int pinLed110V  = 2;        // Pino para o LED indicador do modo 110V
+const int pinLed220V  = 3;        // Pino para o LED indicador do modo 220V
+
+// =================================================================
+// === VARIÁVEIS DE ESTADO: A "memória" do programa ===============
+// =================================================================
+bool modo220V = false;
+bool estadoRele = false;
+bool timeIsSet = false;           // Flag para saber se o relógio já foi ajustado
+unsigned long tempoPressionado = 0;
+unsigned long tempoUltimaTensaoSegura = 0;
+bool emAlertaDeTensao = false;    // Flag para controlar o estado de alerta
+
+// =================================================================
+// === PARÂMETROS DE TENSÃO: Limites de operação ===================
+// =================================================================
+float limiteMin127 = 95.0;
+float limiteMax127 = 135.0;
+float limiteMin220 = 200.0;
+float limiteMax220 = 265.0;
+
+const float fatorCalibracao127 = 492.7;
+const float fatorCalibracao220 = 546.9;
+
+
+// =================================================================
+// === DECLARAÇÃO DE FUNÇÕES: Uma "lista de tarefas" para o compilador ===
+// =================================================================
+void setup();
+void loop();
+void configurarWiFi();
+void handleMainPage();
+void handleGetStatus();
+void handleSetTime();
+void handleSetParams();
+void handleAlternarModo();
+void handleScanWiFi();
+void handleConfigurarWiFi();
+void handleFalhas();
+void handleLimparFalhas();
+float lerTensaoRMS();
+void desligarRele();
+void ligarRele();
+void registrarFalha(float tensao);
+String formatDigit(int digit);
+void syncTimeNTP();
+void atualizarLedsModo(); // <-- NOVA FUNÇÃO
+
+
+// =================================================================
+// === PÁGINA WEB PRINCIPAL (HTML, CSS, JAVASCRIPT) ================
+// =================================================================
+const char PAGE_MAIN[] PROGMEM = R"=====(
+&lt;!DOCTYPE html&gt;
+&lt;html lang="pt-BR"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;Painel ACWatch&lt;/title&gt;
+    &lt;style&gt;
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+            background-color: #111827;
+            color: #f9fafb;
+        }
+        .card {
+            background-color: #1f2937;
+            border-radius: 16px;
+            padding: 32px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+        h1 { font-size: 28px; font-weight: 700; margin: 0 0 8px 0; }
+        .card &gt; p { color: #9ca3af; margin: 0 0 24px 0; }
+        .display-box { background-color: #374151; border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+        .display-box .label { font-size: 12px; font-weight: 500; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; }
+        .voltage-display { background-color: #374151; border-radius: 8px; padding: 20px; margin-bottom: 10px; }
+        #currentVoltage { font-size: 48px; font-weight: 700; }
+        .status-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 24px; }
+        .status-item { background-color: #374151; border-radius: 8px; padding: 16px; }
+        .status-value { font-size: 24px; font-weight: 700; }
+        .relay-on { color: #4ade80; }
+        .relay-off { color: #f87171; }
+        #currentTime { font-size: 40px; font-weight: 700; margin: 4px 0; letter-spacing: 2px; }
+        #currentDate { font-size: 18px; color: #9ca3af; }
+        form { display: flex; flex-direction: column; gap: 16px; }
+        label { display: block; text-align: left; font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+        input[type="number"], select {
+            width: 100%; padding: 10px; border: 1px solid #4b5563; border-radius: 8px; box-sizing: border-box;
+            font-size: 16px; background-color: #374151; color: #f9fafb;
+        }
+        select {
+            -webkit-appearance: none; -moz-appearance: none; appearance: none;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%239ca3af%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');
+            background-repeat: no-repeat; background-position: right 1rem center; background-size: 0.65em auto;
+        }
+        .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .form-grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        button, .button-link {
+            width: 100%; padding: 12px; border: none; border-radius: 8px; background-color: #4f46e5; color: white;
+            font-size: 16px; font-weight: 500; cursor: pointer; transition: background-color 0.2s;
+            text-decoration: none; display: inline-block; box-sizing: border-box;
+        }
+        button:hover, .button-link:hover { background-color: #4338ca; }
+        #statusMessage { height: 24px; font-size: 16px; font-weight: 500; margin-top: 16px;}
+        .status-success { color: #4ade80; }
+        .status-error { color: #f87171; }
+        .links { padding-top: 16px; margin-top: 24px; border-top: 1px solid #374151; }
+        .links p { font-weight: 600; margin: 0 0 8px 0; }
+        .links-container { display: flex; flex-direction: column; gap: 10px; }
+        details &gt; summary { cursor: pointer; color: #9ca3af; margin-top: 16px; padding: 8px; border-radius: 8px; }
+        details &gt; summary:hover { background-color: #374151; }
+    &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div class="card"&gt;
+        &lt;h1&gt;ACWatch&lt;/h1&gt;
+        &lt;p&gt;Painel de controle do dispositivo.&lt;/p&gt;
+        
+        &lt;div class="voltage-display"&gt;
+            &lt;div class="label"&gt;Tens&amp;atilde;o&lt;/div&gt;
+            &lt;div id="currentVoltage" class="status-value"&gt;-- V&lt;/div&gt;
+        &lt;/div&gt;
+
+        &lt;div class="status-grid"&gt;
+            &lt;div class="status-item"&gt;
+                &lt;div class="label"&gt;Modo&lt;/div&gt;
+                &lt;div id="currentMode" class="status-value"&gt;--&lt;/div&gt;
+            &lt;/div&gt;
+            &lt;div class="status-item"&gt;
+                &lt;div class="label"&gt;Rel&amp;eacute;&lt;/div&gt;
+                &lt;div id="relayStatus" class="status-value"&gt;--&lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+
+        &lt;div class="display-box"&gt;
+            &lt;p class="label"&gt;HORA ATUAL DO DISPOSITIVO&lt;/p&gt;
+            &lt;p id="currentTime"&gt;--:--:--&lt;/p&gt;
+            &lt;p id="currentDate"&gt;--/--/----&lt;/p&gt;
+        &lt;/div&gt;
+
+        &lt;div id="statusMessage"&gt;&lt;/div&gt;
+
+        &lt;div class="links"&gt;
+            &lt;p&gt;Configura&amp;ccedil;&amp;otilde;es:&lt;/p&gt;
+            &lt;div class="links-container"&gt;
+                &lt;form action="/modo" method="POST" style="margin:0;"&gt;&lt;button type="submit"&gt;Alternar Modo 110V/220V&lt;/button&gt;&lt;/form&gt;
+                &lt;a href="/scan" class="button-link"&gt;Configurar Wi-Fi&lt;/a&gt;
+                &lt;a href="/falhas" class="button-link"&gt;Ver Falhas&lt;/a&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+
+        &lt;details&gt;
+            &lt;summary&gt;Ajustar Data e Hora&lt;/summary&gt;
+            &lt;form id="timeForm" style="margin-top: 16px;"&gt;
+                &lt;div class="form-grid"&gt;
+                    &lt;div&gt;&lt;label for="day"&gt;Dia&lt;/label&gt;&lt;select id="day" name="day"&gt;&lt;/select&gt;&lt;/div&gt;
+                    &lt;div&gt;&lt;label for="month"&gt;M&amp;ecirc;s&lt;/label&gt;&lt;select id="month" name="month"&gt;&lt;/select&gt;&lt;/div&gt;
+                    &lt;div&gt;&lt;label for="year"&gt;Ano&lt;/label&gt;&lt;select id="year" name="year"&gt;&lt;/select&gt;&lt;/div&gt;
+                    &lt;div&gt;&lt;label for="hour"&gt;Hora&lt;/label&gt;&lt;select id="hour" name="hour"&gt;&lt;/select&gt;&lt;/div&gt;
+                    &lt;div&gt;&lt;label for="minute"&gt;Minuto&lt;/label&gt;&lt;select id="minute" name="minute"&gt;&lt;/select&gt;&lt;/div&gt;
+                    &lt;div&gt;&lt;label for="second"&gt;Segundo&lt;/label&gt;&lt;select id="second" name="second"&gt;&lt;/select&gt;&lt;/div&gt;
+                &lt;/div&gt;
+                &lt;button type="submit"&gt;Confirmar Ajuste de Hora&lt;/button&gt;
+            &lt;/form&gt;
+        &lt;/details&gt;
+        
+        &lt;details&gt;
+            &lt;summary&gt;Ajustar Par&amp;acirc;metros de Tens&amp;atilde;o&lt;/summary&gt;
+            &lt;form id="paramsForm" style="margin-top: 16px;"&gt;
+                &lt;div class="form-grid-2"&gt;
+                    &lt;div&gt;&lt;label for="min110"&gt;M&amp;iacute;n. 110V&lt;/label&gt;&lt;input type="number" id="min110" name="min110" step="0.1"&gt;&lt;/div&gt;
+                    &lt;div&gt;&lt;label for="max110"&gt;M&amp;aacute;x. 110V&lt;/label&gt;&lt;input type="number" id="max110" name="max110" step="0.1"&gt;&lt;/div&gt;
+                    &lt;div&gt;&lt;label for="min220"&gt;M&amp;iacute;n. 220V&lt;/label&gt;&lt;input type="number" id="min220" name="min220" step="0.1"&gt;&lt;/div&gt;
+                    &lt;div&gt;&lt;label for="max220"&gt;M&amp;aacute;x. 220V&lt;/label&gt;&lt;input type="number" id="max220" name="max220" step="0.1"&gt;&lt;/div&gt;
+                &lt;/div&gt;
+                &lt;button type="submit"&gt;Salvar Par&amp;acirc;metros&lt;/button&gt;
+            &lt;/form&gt;
+        &lt;/details&gt;
+    &lt;/div&gt;
+&lt;script&gt;
+    const timeForm = document.getElementById('timeForm');
+    const paramsForm = document.getElementById('paramsForm');
+    const statusMessage = document.getElementById('statusMessage');
+    let initialParamsLoad = true;
+
+    function populateDateTimeSelectors() {
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        const daySel = document.getElementById('day');
+        const monthSel = document.getElementById('month');
+        const yearSel = document.getElementById('year');
+        const hourSel = document.getElementById('hour');
+        const minuteSel = document.getElementById('minute');
+        const secondSel = document.getElementById('second');
+        const pad = (n) =&gt; n.toString().padStart(2, '0');
+        for (let i = 1; i &lt;= 31; i++) daySel.options.add(new Option(pad(i), i));
+        for (let i = 1; i &lt;= 12; i++) monthSel.options.add(new Option(pad(i), i));
+        for (let i = currentYear - 5; i &lt;= currentYear + 5; i++) yearSel.options.add(new Option(i, i));
+        for (let i = 0; i &lt;= 23; i++) hourSel.options.add(new Option(pad(i), i));
+        for (let i = 0; i &lt;= 59; i++) minuteSel.options.add(new Option(pad(i), i));
+        for (let i = 0; i &lt;= 59; i++) secondSel.options.add(new Option(pad(i), i));
+        daySel.value = now.getDate();
+        monthSel.value = now.getMonth() + 1;
+        yearSel.value = currentYear;
+        hourSel.value = now.getHours();
+        minuteSel.value = now.getMinutes();
+        secondSel.value = now.getSeconds();
+    }
+
+    async function fetchStatus() {
+        try {
+            const response = await fetch('/get-status');
+            if (!response.ok) throw new Error('Network response was not ok');
+            const data = await response.json();
+            
+            document.getElementById('currentTime').textContent = data.time;
+            document.getElementById('currentDate').textContent = data.date;
+            document.getElementById('currentVoltage').textContent = data.voltage + ' V';
+            document.getElementById('currentMode').textContent = data.mode;
+            
+            const relayStatusEl = document.getElementById('relayStatus');
+            relayStatusEl.textContent = data.relay;
+            relayStatusEl.className = 'status-value ' + (data.relay === 'LIGADO' ? 'relay-on' : 'relay-off');
+
+            if (initialParamsLoad) {
+                document.getElementById('min110').value = data.limMin110;
+                document.getElementById('max110').value = data.limMax110;
+                document.getElementById('min220').value = data.limMin220;
+                document.getElementById('max220').value = data.limMax220;
+                initialParamsLoad = false;
+            }
+
+        } catch (error) {
+            console.error('Erro ao buscar status:', error);
+        }
+    }
+    async function handleTimeSubmit(event) {
+        event.preventDefault();
+        const day = document.getElementById('day').value;
+        const month = document.getElementById('month').value;
+        const year = document.getElementById('year').value;
+        const hour = document.getElementById('hour').value;
+        const minute = document.getElementById('minute').value;
+        const second = document.getElementById('second').value;
+        const pad = (n) =&gt; n.toString().padStart(2, '0');
+        const formData = new URLSearchParams();
+        formData.append('date', `${year}-${pad(month)}-${pad(day)}`);
+        formData.append('time', `${pad(hour)}:${pad(minute)}:${pad(second)}`);
+        try {
+            const response = await fetch('/set-time', { method: 'POST', body: formData });
+            const resultText = await response.text();
+            showStatusMessage(resultText, response.ok);
+            if(response.ok) fetchStatus();
+        } catch (error) {
+            showStatusMessage('Erro de conexao ao ajustar.', false);
+        }
+    }
+    async function handleParamsSubmit(event) {
+        event.preventDefault();
+        const formData = new URLSearchParams(new FormData(paramsForm));
+        try {
+            const response = await fetch('/set-params', { method: 'POST', body: formData });
+            const resultText = await response.text();
+            showStatusMessage(resultText, response.ok);
+            if (response.ok) {
+                initialParamsLoad = true;
+                fetchStatus();
+            }
+        } catch (error) {
+            showStatusMessage('Erro de conexao ao salvar parametros.', false);
+        }
+    }
+    function showStatusMessage(message, isSuccess) {
+        statusMessage.textContent = message;
+        statusMessage.className = isSuccess ? 'status-success' : 'status-error';
+        setTimeout(() =&gt; { statusMessage.textContent = ''; }, 5000);
+    }
+    document.addEventListener('DOMContentLoaded', () =&gt; {
+        populateDateTimeSelectors();
+        fetchStatus();
+        setInterval(fetchStatus, 1000);
+        timeForm.addEventListener('submit', handleTimeSubmit);
+        paramsForm.addEventListener('submit', handleParamsSubmit);
+    });
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+)=====";
+
+
+// =================================================================
+// === FUNÇÃO SETUP: O que acontece quando o ESP32 liga ==========
+// =================================================================
+void setup() {
+  Serial.begin(115200);
+
+  pinMode(pinRele1, OUTPUT);
+  pinMode(pinRele2, OUTPUT);
+  pinMode(pinBotaoModo, INPUT_PULLUP);
+  pinMode(pinResetWiFi, INPUT_PULLUP);
+  pinMode(pinAlerta, OUTPUT);
+  pinMode(pinLed110V, OUTPUT);
+  pinMode(pinLed220V, OUTPUT);
+  
+  desligarRele(); 
+  digitalWrite(pinAlerta, LOW);
+  tempoUltimaTensaoSegura = millis(); 
+  atualizarLedsModo(); // Atualiza os LEDs de modo na inicialização
+
+  if (!SPIFFS.begin(true)) {
+    Serial.println("Falha ao montar SPIFFS");
+  }
+
+  preferences.begin("ACWatch", false);
+
+  limiteMin127 = preferences.getFloat("limMin127", 95.0);
+  limiteMax127 = preferences.getFloat("limMax127", 135.0);
+  limiteMin220 = preferences.getFloat("limMin220", 200.0);
+  limiteMax220 = preferences.getFloat("limMax220", 265.0);
+
+  configurarWiFi();
+
+  server.on("/", HTTP_GET, handleMainPage);
+  server.on("/get-status", HTTP_GET, handleGetStatus);
+  server.on("/set-time", HTTP_POST, handleSetTime);
+  server.on("/set-params", HTTP_POST, handleSetParams);
+  server.on("/modo", HTTP_POST, handleAlternarModo);
+  server.on("/scan", HTTP_GET, handleScanWiFi);
+  server.on("/configurar", HTTP_POST, handleConfigurarWiFi);
+  server.on("/falhas", HTTP_GET, handleFalhas);
+  server.on("/limpar", HTTP_POST, handleLimparFalhas);
+  
+  server.begin();
+
+  if (MDNS.begin("acwatch")) {
+    Serial.println("mDNS iniciado: http://acwatch.local");
+  } else {
+    Serial.println("Falha ao iniciar mDNS");
+  }
+}
+
+// =================================================================
+// === FUNÇÃO LOOP: O que fica repetindo sem parar ===============
+// =================================================================
+void loop() {
+  server.handleClient();
+
+  if (!timeIsSet &amp;&amp; WiFi.status() == WL_CONNECTED) {
+    syncTimeNTP();
+  }
+
+  static unsigned long ultimoClique = 0;
+  if (digitalRead(pinBotaoModo) == LOW &amp;&amp; millis() - ultimoClique &gt; 1000) {
+    modo220V = !modo220V;
+    ultimoClique = millis();
+    atualizarLedsModo(); // Atualiza os LEDs após a troca de modo
+    Serial.println(modo220V ? "Modo 220V" : "Modo 110V");
+  }
+
+  if (digitalRead(pinResetWiFi) == LOW) {
+    if (tempoPressionado == 0) tempoPressionado = millis();
+    if (millis() - tempoPressionado &gt; 5000) {
+      Serial.println("Reset Wi-Fi solicitado!");
+      preferences.clear();
+      delay(1000);
+      ESP.restart();
+    }
+  } else {
+    tempoPressionado = 0;
+  }
+
+  float tensao = lerTensaoRMS();
+  float limiteMin = modo220V ? limiteMin220 : limiteMin127;
+  float limiteMax = modo220V ? limiteMax220 : limiteMax127;
+
+  if (tensao &lt; limiteMin || tensao &gt; limiteMax) {
+    emAlertaDeTensao = true;
+    if (estadoRele) {
+      desligarRele();
+      Serial.println("Tensao fora da faixa! Rele desligado.");
+      registrarFalha(tensao);
+    }
+    tempoUltimaTensaoSegura = millis();
+  }
+  else {
+    emAlertaDeTensao = false;
+    digitalWrite(pinAlerta, LOW);
+    if (!estadoRele &amp;&amp; (millis() - tempoUltimaTensaoSegura &gt; 10000)) {
+      ligarRele();
+      Serial.println("Tensao estavel por 10s. Rele religado.");
+    }
+  }
+
+  if (emAlertaDeTensao) {
+    digitalWrite(pinAlerta, (millis() / 500) % 2);
+  }
+}
+
+// =================================================================
+// === FUNÇÕES DO SERVIDOR WEB: O que cada endereço faz ==========
+// =================================================================
+
+void handleMainPage() {
+  server.send(200, "text/html", PAGE_MAIN);
+}
+
+void handleGetStatus() {
+  struct tm timeinfo;
+  String dateStr = "--/--/----";
+  String timeStr = "--:--:--";
+
+  if(timeIsSet &amp;&amp; getLocalTime(&amp;timeinfo)){
+    dateStr = String(formatDigit(timeinfo.tm_mday)) + "/" + String(formatDigit(timeinfo.tm_mon + 1)) + "/" + String(timeinfo.tm_year + 1900);
+    timeStr = String(formatDigit(timeinfo.tm_hour)) + ":" + String(formatDigit(timeinfo.tm_min)) + ":" + String(formatDigit(timeinfo.tm_sec));
+  }
+  
+  String voltageStr = String(lerTensaoRMS(), 1);
+  String modeStr = modo220V ? "220V" : "110V";
+  String relayStr = estadoRele ? "LIGADO" : "DESLIGADO";
+
+  String json = "{";
+  json += "\"date\":\"" + dateStr + "\",";
+  json += "\"time\":\"" + timeStr + "\",";
+  json += "\"voltage\":" + voltageStr + ",";
+  json += "\"mode\":\"" + modeStr + "\",";
+  json += "\"relay\":\"" + relayStr + "\",";
+  json += "\"limMin110\":" + String(limiteMin127) + ",";
+  json += "\"limMax110\":" + String(limiteMax127) + ",";
+  json += "\"limMin220\":" + String(limiteMin220) + ",";
+  json += "\"limMax220\":" + String(limiteMax220);
+  json += "}";
+  
+  server.send(200, "application/json", json);
+}
+
+void handleSetTime() {
+  if (server.hasArg("date") &amp;&amp; server.hasArg("time")) {
+    String dateStr = server.arg("date");
+    String timeStr = server.arg("time");
+    
+    struct tm tm;
+    sscanf(dateStr.c_str(), "%d-%d-%d", &amp;tm.tm_year, &amp;tm.tm_mon, &amp;tm.tm_mday);
+    sscanf(timeStr.c_str(), "%d:%d:%d", &amp;tm.tm_hour, &amp;tm.tm_min, &amp;tm.tm_sec);
+
+    tm.tm_year -= 1900;
+    tm.tm_mon -= 1;
+
+    time_t t = mktime(&amp;tm);
+    struct timeval tv = { .tv_sec = t };
+    settimeofday(&amp;tv, NULL);
+
+    timeIsSet = true;
+    Serial.println("Hora ajustada manualmente!");
+    server.send(200, "text/plain", "Data e Hora ajustadas com sucesso!");
+  } else {
+    server.send(400, "text/plain", "Erro: Dados incompletos.");
+  }
+}
+
+void handleSetParams() {
+  if (server.hasArg("min110") &amp;&amp; server.hasArg("max110") &amp;&amp; server.hasArg("min220") &amp;&amp; server.hasArg("max220")) {
+    limiteMin127 = server.arg("min110").toFloat();
+    limiteMax127 = server.arg("max110").toFloat();
+    limiteMin220 = server.arg("min220").toFloat();
+    limiteMax220 = server.arg("max220").toFloat();
+
+    preferences.putFloat("limMin127", limiteMin127);
+    preferences.putFloat("limMax127", limiteMax127);
+    preferences.putFloat("limMin220", limiteMin220);
+    preferences.putFloat("limMax220", limiteMax220);
+    
+    Serial.println("Novos parametros de tensao salvos!");
+    server.send(200, "text/plain", "Parametros salvos com sucesso!");
+  } else {
+    server.send(400, "text/plain", "Erro: Dados de parametros incompletos.");
+  }
+}
+
+void configurarWiFi() {
+  String ssid = preferences.getString("ssid", "");
+  String password = preferences.getString("password", "");
+  if (ssid != "" &amp;&amp; password != "") {
+    WiFi.begin(ssid.c_str(), password.c_str());
+    Serial.print("Conectando ao Wi-Fi: ");
+    Serial.println(ssid);
+    unsigned long inicio = millis();
+    while (WiFi.status() != WL_CONNECTED &amp;&amp; millis() - inicio &lt; 10000) {
+      delay(500);
+      Serial.print(".");
+    }
+    if (WiFi.status() == WL_CONNECTED) {
+      Serial.println("\nConectado ao Wi-Fi!");
+      Serial.print("IP: ");
+      Serial.println(WiFi.localIP());
+      timeClient.begin();
+      return;
+    } else {
+      Serial.println("\nFalha ao conectar ao Wi-Fi.");
+    }
+  }
+  WiFi.softAP(ssidAP, passwordAP);
+  IPAddress IP = WiFi.softAPIP();
+  Serial.print("Modo AP ativado. Acesse: http://");
+  Serial.println(IP);
+}
+
+void handleAlternarModo() {
+  modo220V = !modo220V;
+  tempoUltimaTensaoSegura = millis();
+  atualizarLedsModo(); // Atualiza os LEDs após a troca de modo
+  server.sendHeader("Location", "/");
+  server.send(303);
+}
+
+void handleScanWiFi() {
+  int n = WiFi.scanNetworks();
+  String html = R"=====(
+   &lt;!DOCTYPE html&gt;&lt;html lang="pt-BR"&gt;&lt;head&gt;
+   &lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;&lt;title&gt;Scan Wi-Fi&lt;/title&gt;
+   &lt;style&gt;
+        body {font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;margin: 0;padding: 20px;display: flex;justify-content: center;align-items: center;min-height: 100vh;box-sizing: border-box;background-color: #111827;color: #f9fafb;}
+        .card {background-color: #1f2937;border-radius: 16px;padding: 32px;width: 100%;max-width: 400px;box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);text-align: center;}
+        h1 {font-size: 28px;font-weight: 700;margin: 0 0 24px 0;}
+        .wifi-item {padding: 12px; border-bottom: 1px solid #4b5563; cursor: pointer; text-align: left;}
+        .wifi-item:hover {background-color: #374151;}
+        form { display: flex; flex-direction: column; gap: 16px; margin-top: 24px;}
+        input {width: 100%;padding: 10px;border: 1px solid #4b5563;border-radius: 8px;box-sizing: border-box;font-size: 16px;background-color: #374151;color: #f9fafb;}
+        button, .button-link {width: 100%;padding: 12px;border: none;border-radius: 8px;background-color: #4f46e5;color: white;font-size: 16px;font-weight: 500;cursor: pointer;transition: background-color 0.2s;text-decoration: none;display: inline-block;box-sizing: border-box; margin-top: 8px;}
+        button:hover, .button-link:hover { background-color: #4338ca; }
+   &lt;/style&gt;
+   &lt;/head&gt;&lt;body&gt;
+   &lt;div class="card"&gt;
+     &lt;h1&gt;Redes Wi-Fi Dispon&amp;iacute;veis&lt;/h1&gt;
+     &lt;div style="max-height: 200px; overflow-y: auto; border: 1px solid #4b5563; border-radius: 8px;"&gt;
+  )=====";
+
+  if (n &gt; 0) {
+    for (int i = 0; i &lt; n; i++) {
+      html += "&lt;div class='wifi-item' onclick=\"document.getElementById('ssid').value='" + WiFi.SSID(i) + "'\"&gt;" + WiFi.SSID(i) + " (" + WiFi.RSSI(i) + "dBm)&lt;/div&gt;";
+    }
+  } else {
+    html += "&lt;p style='padding: 12px;'&gt;Nenhuma rede encontrada.&lt;/p&gt;";
+  }
+
+  html += R"=====(
+     &lt;/div&gt;
+     &lt;form action="/configurar" method="POST"&gt;
+       &lt;input type="text" id="ssid" name="ssid" placeholder="Nome da Rede (SSID)"&gt;
+       &lt;input type="password" id="password" name="password" placeholder="Senha"&gt;
+       &lt;button type="submit"&gt;Salvar e Reiniciar&lt;/button&gt;
+     &lt;/form&gt;
+     &lt;a href="/" class="button-link"&gt;Voltar&lt;/a&gt;
+   &lt;/div&gt;
+   &lt;/body&gt;&lt;/html&gt;
+  )=====";
+
+  server.send(200, "text/html", html);
+}
+
+// Salva as credenciais de Wi-Fi na memória e reinicia o ESP32
+void handleConfigurarWiFi() {
+  if (server.hasArg("ssid") &amp;&amp; server.hasArg("password")) {
+    String ssid = server.arg("ssid");
+    String password = server.arg("password");
+    preferences.putString("ssid", ssid);
+    preferences.putString("password", password);
+    server.send(200, "text/plain", "Credenciais salvas! Reiniciando...");
+    delay(1000);
+    ESP.restart();
+  } else {
+    server.send(400, "text/plain", "Falha ao salvar credenciais.");
+  }
+}
+
+// Mostra a página com o histórico de falhas de tensão
+void handleFalhas() {
+  File log = SPIFFS.open("/falhas.log", FILE_READ);
+  String html = R"=====(
+  &lt;!DOCTYPE html&gt;&lt;html lang="pt-BR"&gt;&lt;head&gt;&lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;&lt;title&gt;Hist&amp;oacute;rico de Falhas&lt;/title&gt;
+  &lt;style&gt;
+        body {font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;margin: 0;padding: 20px;display: flex;justify-content: center;align-items: center;min-height: 100vh;box-sizing: border-box;background-color: #111827;color: #f9fafb;}
+        .card {background-color: #1f2937;border-radius: 16px;padding: 32px;width: 100%;max-width: 600px;box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);text-align: center;}
+        h1 {font-size: 28px;font-weight: 700;margin: 0 0 24px 0;}
+        table {width: 100%; border-collapse: collapse; }
+        th, td {border: 1px solid #4b5563; padding: 12px; text-align: left;}
+        th {background-color: #374151;}
+        button, .button-link {width: 100%;padding: 12px;border: none;border-radius: 8px;background-color: #4f46e5;color: white;font-size: 16px;font-weight: 500;cursor: pointer;transition: background-color 0.2s;text-decoration: none;display: inline-block;box-sizing: border-box; margin-top: 16px;}
+        button:hover, .button-link:hover { background-color: #4338ca; }
+        .button-danger { background-color: #dc2626; }
+        .button-danger:hover { background-color: #b91c1c; }
+  &lt;/style&gt;
+  &lt;/head&gt;&lt;body&gt;
+  &lt;div class="card"&gt;
+    &lt;h1&gt;Hist&amp;oacute;rico de Falhas&lt;/h1&gt;
+    &lt;div style="max-height: 400px; overflow-y: auto;"&gt;
+    &lt;table&gt;
+  )=====";
+
+  if (!log || log.size() == 0) {
+    html += "&lt;tr&gt;&lt;td colspan='2' style='text-align: center;'&gt;Nenhuma falha registrada.&lt;/td&gt;&lt;/tr&gt;";
+  } else {
+    html += "&lt;tr&gt;&lt;th&gt;Data e Hora&lt;/th&gt;&lt;th&gt;Evento&lt;/th&gt;&lt;/tr&gt;";
+    while (log.available()) {
+      String linha = log.readStringUntil('\n');
+      html += "&lt;tr&gt;&lt;td colspan='2'&gt;" + linha + "&lt;/td&gt;&lt;/tr&gt;";
+    }
+  }
+  log.close();
+  
+  html += R"=====(
+    &lt;/table&gt;
+    &lt;/div&gt;
+    &lt;form action="/limpar" method="POST" onsubmit="return confirm('Tem certeza que deseja apagar todo o historico?');"&gt;
+      &lt;button type="submit" class="button-danger"&gt;Limpar Hist&amp;oacute;rico&lt;/button&gt;
+    &lt;/form&gt;
+    &lt;a href="/" class="button-link"&gt;Voltar&lt;/a&gt;
+  &lt;/div&gt;
+  &lt;/body&gt;&lt;/html&gt;
+  )=====";
+  server.send(200, "text/html", html);
+}
+
+// Apaga o arquivo de log de falhas
+void handleLimparFalhas() {
+  if (SPIFFS.exists("/falhas.log")) {
+    SPIFFS.remove("/falhas.log");
+    server.sendHeader("Location", "/falhas");
+    server.send(303);
+  } else {
+    server.send(200, "text/plain", "Nenhum historico para apagar.");
+  }
+}
+
+
+// =================================================================
+// === FUNÇÕES AUXILIARES: Tarefas de apoio ========================
+// =================================================================
+
+// Tenta sincronizar a hora com o servidor NTP
+void syncTimeNTP() {
+  if (timeClient.update()) {
+    timeIsSet = true;
+    Serial.println("Hora sincronizada com sucesso via NTP!");
+  } else {
+    Serial.println("Falha ao sincronizar a hora via NTP. Aguardando ajuste manual.");
+  }
+}
+
+// Atualiza os LEDs de modo de tensão
+void atualizarLedsModo() {
+  if (modo220V) {
+    digitalWrite(pinLed110V, LOW);
+    digitalWrite(pinLed220V, HIGH);
+  } else {
+    digitalWrite(pinLed110V, HIGH);
+    digitalWrite(pinLed220V, LOW);
+  }
+}
+
+// Adiciona um zero à esquerda para números menores que 10 (ex: 7 vira "07")
+String formatDigit(int digit) {
+  if (digit &lt; 10) {
+    return "0" + String(digit);
+  }
+  return String(digit);
+}
+
+// Lê o valor do sensor e calcula a tensão RMS real
+float lerTensaoRMS() {
+  const int N = 1000;
+  float soma = 0;
+  for (int i = 0; i &lt; N; i++) {
+    int leitura = analogRead(pinSensor);
+    float tensao = (leitura - 2048) * (3.3 / 4096.0);
+    soma += tensao * tensao;
+  }
+  float vrms = sqrt(soma / N);
+  float fator = modo220V ? fatorCalibracao220 : fatorCalibracao127;
+  return vrms * fator;
+}
+
+// Desliga os dois relés
+void desligarRele() {
+  digitalWrite(pinRele1, LOW);
+  digitalWrite(pinRele2, LOW);
+  estadoRele = false;
+}
+
+// Liga os dois relés
+void ligarRele() {
+  digitalWrite(pinRele1, HIGH);
+  digitalWrite(pinRele2, HIGH);
+  estadoRele = true;
+}
+
+// Salva uma nova linha no arquivo de log de falhas
+void registrarFalha(float tensao) {
+  // Só registra a falha se o relógio já estiver ajustado
+  if (!timeIsSet) {
+    Serial.println("Log de falha ignorado: relogio nao sincronizado.");
+    return;
+  }
+  
+  struct tm timeinfo;
+  getLocalTime(&amp;timeinfo);
+  char timeString[20];
+  strftime(timeString, sizeof(timeString), "%Y-%m-%d %H:%M:%S", &amp;timeinfo);
+
+  String registro = String(timeString) + " - Tensao fora da faixa: " + String(tensao, 1) + "V\n";
+
+  File log = SPIFFS.open("/falhas.log", FILE_APPEND);
+  if (log) {
+    log.print(registro);
+    log.close();
+    Serial.println("Falha registrada no SPIFFS.");
+  } else {
+    Serial.println("Erro ao abrir falhas.log");
+  }
+}
+```
+</pre>
+                </div>
+            </div>
+            
+            <!-- Rodapé -->
+            <div class="text-center border-t border-gray-200 dark:border-gray-700 pt-6 mt-8 no-print">
+                <p class="text-sm text-gray-500 dark:text-gray-400">Documento gerado para o projeto ACWatch. Bom trabalho!</p>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        function copyCode() {
+            const codeElement = document.getElementById('sketch-code');
+            const code = codeElement.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Código copiado para a área de transferência!');
+            }, (err) => {
+                alert('Erro ao copiar o código: ', err);
+            });
+        }
+    </script>
+
+</body>
+</html>
