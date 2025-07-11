@@ -1,10 +1,7 @@
 /*
-  ACWatch - Sketch com Web UI, RTC DS3231 e histórico de falhas
-  Modificado por Gemini em 11/07/2024
-  - CORREÇÃO: Melhorada a lógica de inicialização do RTC para não resetar a hora automaticamente, evitando que o relógio fique preso em um horário antigo em caso de falha na bateria do módulo.
-  - UPGRADE: Adicionada funcionalidade para ajustar o tempo de religamento do relé via interface web.
-  - UPGRADE: O tempo de religamento agora é salvo na memória permanente.
-*/
+  ACWatch Plus - Sketch com Web UI, RTC DS3231 e histórico de falhas
+  Desenvolvido por Billy H. Dorsch
+  */
 
 // =================================================================
 // === BIBLIOTECAS: As "caixas de ferramentas" do projeto ========
@@ -51,10 +48,11 @@ const int pinResetWiFi  = 15;
 // =================================================================
 bool modo220V = false;
 bool estadoRele = false;
+bool emAlertaDeTensao = false;
 unsigned long tempoPressionado = 0;
 unsigned long ultimoAtualizacao = 0;
 unsigned long tempoUltimaTensaoSegura = 0;
-unsigned long tempoReligamento = 10000; // Valor padrão de 10 segundos (em milissegundos)
+unsigned long tempoReligamento = 10000;
 
 // =================================================================
 // === PARÂMETROS DE TENSÃO: Limites de operação ===================
@@ -102,7 +100,7 @@ const char PAGE_MAIN[] PROGMEM = R"=====(
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel ACWatch</title>
+    <title>Painel ACWatch Plus</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -130,12 +128,14 @@ const char PAGE_MAIN[] PROGMEM = R"=====(
         .display-box { background-color: #374151; border-radius: 8px; padding: 16px; margin-bottom: 16px; }
         .display-box .label { font-size: 12px; font-weight: 500; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; }
         .voltage-display { background-color: #374151; border-radius: 8px; padding: 20px; margin-bottom: 10px; }
-        #currentVoltage { font-size: 48px; font-weight: 700; }
+        #currentVoltage { font-size: 48px; font-weight: 700; transition: color 0.3s; }
         .status-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 24px; }
         .status-item { background-color: #374151; border-radius: 8px; padding: 16px; }
         .status-value { font-size: 24px; font-weight: 700; }
         .relay-on { color: #4ade80; }
         .relay-off { color: #f87171; }
+        .text-normal { color: #eab308; } /* Amarelo */
+        .text-alert { color: #ef4444; } /* Vermelho */
         #currentTime { font-size: 40px; font-weight: 700; margin: 4px 0; letter-spacing: 2px; }
         #currentDate { font-size: 18px; color: #9ca3af; }
         form { display: flex; flex-direction: column; gap: 16px; }
@@ -169,7 +169,7 @@ const char PAGE_MAIN[] PROGMEM = R"=====(
 </head>
 <body>
     <div class="card">
-        <h1>ACWatch</h1>
+        <h1>ACWatch Plus</h1>
         <p>Painel de controle do dispositivo.</p>
         
         <div class="voltage-display">
@@ -190,7 +190,7 @@ const char PAGE_MAIN[] PROGMEM = R"=====(
 
         <div class="display-box">
             <p class="label">HORA ATUAL DO DISPOSITIVO</p>
-            <p id="currentTime">--:--:--</p>
+            <p id="currentTime" class="text-normal">--:--:--</p>
             <p id="currentDate">--/--/----</p>
         </div>
 
@@ -289,6 +289,15 @@ const char PAGE_MAIN[] PROGMEM = R"=====(
             const relayStatusEl = document.getElementById('relayStatus');
             relayStatusEl.textContent = data.relay;
             relayStatusEl.className = 'status-value ' + (data.relay === 'LIGADO' ? 'relay-on' : 'relay-off');
+
+            const voltageEl = document.getElementById('currentVoltage');
+            if (data.alertState) {
+                voltageEl.classList.remove('text-normal');
+                voltageEl.classList.add('text-alert');
+            } else {
+                voltageEl.classList.remove('text-alert');
+                voltageEl.classList.add('text-normal');
+            }
 
             if (initialParamsLoad) {
                 document.getElementById('min110').value = data.limMin110;
@@ -395,7 +404,7 @@ void setup() {
   display.setTextColor(SSD1306_WHITE);
   display.setTextSize(1);
   display.setCursor(0, 0);
-  display.println("ACWatch iniciando...");
+  display.println("ACWatch+ iniciando...");
   display.display();
 
   if (!SPIFFS.begin(true)) {
@@ -436,12 +445,9 @@ void setup() {
     while (true);
   }
   
-  // LÓGICA DO RTC CORRIGIDA
   if (rtc.lostPower()) {
     Serial.println("ATENCAO: A energia do RTC foi perdida. O horario pode estar incorreto.");
     Serial.println("Ajuste o horario pela interface web para sincronizar.");
-    // Nao ajustamos a hora automaticamente. Forcamos o usuario a fazer isso.
-    // Assim que a hora for ajustada via web, o flag 'lostPower' sera limpo.
   }
 }
 
@@ -480,6 +486,7 @@ void loop() {
   float limiteMax = modo220V ? limiteMax220 : limiteMax127;
 
   if (tensao < limiteMin || tensao > limiteMax) {
+    emAlertaDeTensao = true; // Ativa o estado de alerta
     if (estadoRele) {
       desligarRele();
       Serial.println("Tensao fora da faixa! Rele desligado.");
@@ -488,6 +495,7 @@ void loop() {
     tempoUltimaTensaoSegura = millis();
   }
   else {
+    emAlertaDeTensao = false; // Desativa o estado de alerta
     if (!estadoRele && (millis() - tempoUltimaTensaoSegura > tempoReligamento)) {
       ligarRele();
       Serial.println("Tensao estavel. Rele religado.");
@@ -518,6 +526,7 @@ void handleGetStatus() {
   json += "\"voltage\":" + voltageStr + ",";
   json += "\"mode\":\"" + modeStr + "\",";
   json += "\"relay\":\"" + relayStr + "\",";
+  json += "\"alertState\":" + String(emAlertaDeTensao ? "true" : "false") + ","; // <-- ENVIA O ESTADO DE ALERTA
   json += "\"limMin110\":" + String(limiteMin127) + ",";
   json += "\"limMax110\":" + String(limiteMax127) + ",";
   json += "\"limMin220\":" + String(limiteMin220) + ",";
@@ -676,7 +685,7 @@ void handleFalhas() {
         h1 {font-size: 28px;font-weight: 700;margin: 0 0 24px 0;}
         table {width: 100%; border-collapse: collapse; }
         th, td {border: 1px solid #4b5563; padding: 12px; text-align: left;}
-        th {background-color: #374151;}
+        th {background-color: #374151; text-align: center;}
         button, .button-link {width: 100%;padding: 12px;border: none;border-radius: 8px;background-color: #4f46e5;color: white;font-size: 16px;font-weight: 500;cursor: pointer;transition: background-color 0.2s;text-decoration: none;display: inline-block;box-sizing: border-box; margin-top: 16px;}
         button:hover, .button-link:hover { background-color: #4338ca; }
         .button-danger { background-color: #dc2626; }
@@ -687,15 +696,15 @@ void handleFalhas() {
     <h1>Hist&oacute;rico de Falhas</h1>
     <div style="max-height: 400px; overflow-y: auto;">
     <table>
+      <tr><th>Registro de Falhas</th></tr>
   )=====";
 
   if (!log || log.size() == 0) {
-    html += "<tr><td colspan='2' style='text-align: center;'>Nenhuma falha registrada.</td></tr>";
+    html += "<tr><td>Nenhuma falha registrada.</td></tr>";
   } else {
-    html += "<tr><th>Data e Hora</th><th>Evento</th></tr>";
     while (log.available()) {
       String linha = log.readStringUntil('\n');
-      html += "<tr><td colspan='2'>" + linha + "</td></tr>";
+      html += "<tr><td>" + linha + "</td></tr>";
     }
   }
   log.close();
@@ -786,7 +795,7 @@ void atualizarDisplay(float tensao, DateTime now) {
 
   display.clearDisplay();
 
-  printCentralizado("ACWatch", 0, 2);
+  printCentralizado("ACWatch +", 0, 2);
 
   String leitura = String(tensao, 1) + " V";
   printCentralizado(leitura, 18, 2);
