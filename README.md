@@ -139,7 +139,7 @@ Circuito Snubber nos relés comuns
 
 [x] ACWatch V1: ✅ Concluída e funcional
 
-[ ] ACWatch V2: ⚙️ Sensores de temperatura, umidade e corrente, (em desenvolvimento)
+[ ] ACWatch V2: ⚙️ Timer programavel para ligar e desligar em horarios estabelecidos, sensor Pzem-004t 3.0 para medição do consumo em tempo real e log diario, mensal e anual, (em desenvolvimento)
 
 📜 Licença
 
