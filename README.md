@@ -1,9 +1,9 @@
 📝 ACWatch – Protetor de Tensão Inteligente com Monitoramento Web
 
+Bem-vindo ao repositório oficial do ACWatch, um sistema de proteção elétrica com alma de engenharia! Baseado em ESP32, oferece monitoramento web, controle de relé, RTC, interface intuitiva e possibilidade de expansão com sensores.
+
 ⚠️ Nível de Dificuldade: Médio
 Este projeto requer conhecimentos básicos de eletrônica e programação. A montagem envolve solda e manipulação da rede elétrica. Além disso, para uma leitura precisa da tensão, são necessários ajustes finos no código (calibração) e no trimpot do sensor ZMPT101B.
-
-Bem-vindo ao repositório oficial do ACWatch, um sistema de proteção elétrica com alma de engenharia! Baseado em ESP32, oferece monitoramento web, controle de relé, RTC, interface intuitiva e possibilidade de expansão com sensores.
 
 🔧 Funcionalidades Principais
 ⚡ Proteção Ativa: desliga automaticamente quando a tensão sai dos limites seguros
